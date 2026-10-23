@@ -1,0 +1,76 @@
+
+<footer class="site-footer">
+  <div class="footer-main">
+
+    <div class="footer-brand">
+      <a class="brand" routerLink="/">
+        <span class="brand-icon">
+          <img src="assets/logo.png" alt="INTERTOTO logo">
+        </span>
+
+        <span class="brand-text">
+          <strong>INTERTOTO</strong>
+          <small>LIGA U MALOM FUDBALU</small>
+        </span>
+      </a>
+
+      <p>
+        Zvanični sajt Intertoto lige.
+        Rezultati, raspored, statistika i sve
+        najvažnije informacije na jednom mestu.
+      </p>
+    </div>
+
+    <div class="footer-column">
+      <h3>Brzi linkovi</h3>
+      <a routerLink="/">Početna</a>
+      <a routerLink="/raspored">Raspored</a>
+      <a routerLink="/rezultati">Rezultati</a>
+      <a routerLink="/tabela">Tabela</a>
+    </div>
+
+    <div class="footer-column">
+      <h3>Takmičenje</h3>
+      <a routerLink="/statistika">Statistika</a>
+      <a routerLink="/news">Vesti</a>
+    </div>
+
+    <div class="footer-column footer-contact">
+      <h3>Kontakt</h3>
+
+      <a routerLink="/kontakt">
+        <fa-icon [icon]="icons.email"></fa-icon>
+        Kontakt
+      </a>
+
+      <a
+        href="https://www.instagram.com/intertoto_liga/"
+        target="_blank"
+        rel="noopener noreferrer">
+        <fa-icon [icon]="icons.instagram"></fa-icon>
+        Instagram
+      </a>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <span>
+      © {{ currentYear }} Intertoto liga. Sva prava zadržana.
+    </span>
+  </div>
+  @if (showScrollTop) {
+    <button
+      class="scroll-top-button"
+      type="button"
+      aria-label="Vrati na vrh"
+      title="Vrati na vrh"
+      (click)="scrollToTop()">
+
+      <span class="scroll-top-icon">
+        <fa-icon [icon]="icons.arrowUp"></fa-icon>
+      </span>
+
+    </button>
+  }
+</footer>

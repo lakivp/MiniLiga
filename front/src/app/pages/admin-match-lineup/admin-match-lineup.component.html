@@ -1,0 +1,545 @@
+@if (loading) {
+
+  <main class="admin-lineup-page">
+
+    <div class="state-card">
+
+      <div class="spinner"></div>
+
+      <span>
+        Učitavanje sastava...
+      </span>
+
+    </div>
+
+  </main>
+
+}
+@else if (error) {
+
+  <main class="admin-lineup-page">
+
+    <div class="state-card error">
+
+      <div class="error-icon">
+        !
+      </div>
+
+      <h2>
+        Greška
+      </h2>
+
+      <p>
+        {{ error }}
+      </p>
+
+    </div>
+
+  </main>
+
+}
+@else if (match) {
+
+  <main class="admin-lineup-page">
+
+    <!-- HEADER -->
+
+    <section class="page-header">
+
+      <div>
+
+        <span class="eyebrow">
+          ADMINISTRACIJA
+        </span>
+
+        <h1>
+          Sastavi utakmice
+        </h1>
+
+        <p>
+          {{ match.homeTeam?.name }}
+          —
+          {{ match.awayTeam?.name }}
+        </p>
+
+      </div>
+
+      <div class="match-info">
+
+        {{ match.matchDate | date:'dd.MM.yyyy. HH:mm' }}
+
+      </div>
+
+    </section>
+
+
+    <!-- TEAM SWITCH -->
+
+    <section class="team-selector">
+
+      <button
+        [class.active]="
+          selectedTeamId === match.homeTeam?.id
+        "
+        (click)="
+          selectedTeamId = match.homeTeam?.id;
+          onTeamChange()
+        "
+      >
+
+        @if (match.homeTeam?.logoUrl) {
+
+          <img
+            [src]="match.homeTeam.logoUrl"
+            [alt]="match.homeTeam.name"
+          >
+
+        }
+
+        <span>
+          {{ match.homeTeam?.name }}
+        </span>
+
+      </button>
+
+
+      <button
+        [class.active]="
+          selectedTeamId === match.awayTeam?.id
+        "
+        (click)="
+          selectedTeamId = match.awayTeam?.id;
+          onTeamChange()
+        "
+      >
+
+        @if (match.awayTeam?.logoUrl) {
+
+          <img
+            [src]="match.awayTeam.logoUrl"
+            [alt]="match.awayTeam.name"
+          >
+
+        }
+
+        <span>
+          {{ match.awayTeam?.name }}
+        </span>
+
+      </button>
+
+    </section>
+
+
+    <!-- FORM -->
+
+    <section
+      class="editor-card"
+      *ngIf="getAvailablePlayers().length > 0"
+    >
+
+      <div class="card-header">
+
+        <div>
+
+          <span class="eyebrow">SASTAV</span>
+
+          <h2>
+            Dodaj igrača u postavu
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <!-- PLAYER -->
+
+        <div class="form-group">
+
+          <label>
+            Igrač
+          </label>
+
+          <select
+            [(ngModel)]="selectedPlayerId"
+            [disabled]="!!editingLineupId"
+            (change)="onPlayerChange()"
+          >
+
+            <option [ngValue]="null">
+              Izaberi igrača
+            </option>
+
+            @for (
+              player of getAvailablePlayers();
+              track player.id
+            ) {
+
+              <option
+                [ngValue]="player.id"
+              >
+
+                {{ getPlayerName(player) }}
+
+                @if (
+                  player.jerseyNumber != null
+                ) {
+
+                  —
+                  #{{ player.jerseyNumber }}
+
+                }
+
+              </option>
+
+            }
+
+            @if (
+              editingLineupId &&
+              selectedPlayer
+            ) {
+
+              <option
+                [ngValue]="selectedPlayer.id"
+              >
+
+                {{ getPlayerName(selectedPlayer) }}
+
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <!-- POSITION -->
+
+        <div class="form-group">
+
+          <label>
+            Pozicija
+          </label>
+
+          <select
+            [(ngModel)]="position"
+          >
+
+            <option value="">
+              Izaberi poziciju
+            </option>
+
+            <option value="Golman">
+              Golman
+            </option>
+
+            <option value="Odbrana">
+              Odbrana
+            </option>
+
+            <option value="Vezni">
+              Vezni
+            </option>
+
+            <option value="Napad">
+              Napad
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- ORDER -->
+
+        <div class="form-group">
+
+          <label>
+            Redosled
+          </label>
+
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="order"
+          >
+
+        </div>
+
+
+        <!-- NOTES -->
+
+        <div class="form-group full">
+
+          <label>
+            Napomena
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="notes"
+            placeholder="Opcionalna napomena..."
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="form-actions">
+
+        @if (editingLineupId) {
+
+          <button
+            class="btn secondary"
+            (click)="resetForm()"
+          >
+            Otkaži
+          </button>
+
+        }
+
+        <button
+          class="btn primary"
+          [disabled]="saving"
+          (click)="save()"
+        >
+
+          @if (saving) {
+
+            Čuvanje...
+
+          }
+          @else if (editingLineupId) {
+
+            Sačuvaj izmene
+
+          }
+          @else {
+
+            + Dodaj igrača
+
+          }
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- CURRENT LINEUP -->
+
+    <section class="lineup-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <span class="eyebrow">
+            SASTAV
+          </span>
+
+          <h2>
+            {{ selectedTeamId === match.homeTeam?.id
+              ? match.homeTeam?.name
+              : match.awayTeam?.name }}
+          </h2>
+
+        </div>
+
+        <span class="player-count">
+
+          {{ getSelectedTeamLineup().length }}
+
+          igrača
+
+        </span>
+
+      </div>
+
+
+      @if (
+        getSelectedTeamLineup().length
+      ) {
+
+        <div class="lineup-table">
+
+          <div class="table-header">
+
+            <span>
+              #
+            </span>
+
+            <span>
+              IGRAČ
+            </span>
+
+            <span>
+              POZICIJA
+            </span>
+
+            <span>
+              REDOSLED
+            </span>
+
+          </div>
+
+
+          @for (
+            player of getSelectedTeamLineup();
+            track player.id
+          ) {
+
+            <div class="table-row">
+
+              <span class="shirt-number">
+
+                {{ player.jerseyNumber ?? '-' }}
+
+              </span>
+
+
+              <div class="player-name">
+
+                @if (
+                  player.playerPhotoUrl
+                ) {
+
+                  <img
+                    [src]="player.playerPhotoUrl"
+                    [alt]="player.playerName"
+                  >
+
+                }
+
+                <strong>
+                  {{ player.playerName }}
+                </strong>
+
+              </div>
+
+
+              <span class="position">
+                {{ player.position || '-' }}
+              </span>
+
+
+              <span class="order">
+                {{ player.order }}
+              </span>
+
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+      @else {
+
+        <div class="empty">
+
+          <div>
+            👥
+          </div>
+
+          <h3>
+            Sastav je prazan
+          </h3>
+
+          <p>
+            Nema aktivnih igrača u timu.
+          </p>
+
+        </div>
+
+      }
+
+    </section>
+
+    <div
+      class="remove-player-backdrop"
+      *ngIf="playerToRemove as player"
+      (click)="cancelRemovePlayer()"
+    >
+
+      <section
+        class="remove-player-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="remove-player-title"
+        (click)="$event.stopPropagation()"
+      >
+
+        <div class="remove-player-heading">
+
+          <div class="remove-player-icon">
+            <i class="fa-solid fa-user-minus"></i>
+          </div>
+
+          <button
+            type="button"
+            class="remove-player-close"
+            aria-label="Otkaži"
+            [disabled]="deletingPlayer"
+            (click)="cancelRemovePlayer()"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
+        </div>
+
+        <div class="remove-player-content">
+          <span class="remove-player-eyebrow">POTVRDA UKLANJANJA</span>
+
+          <h2 id="remove-player-title">Ukloniti igrača?</h2>
+
+          <p>
+            Da li želiš da ukloniš
+            <strong>{{ player.playerName }}</strong>
+            iz sastava ove utakmice?
+          </p>
+
+          <span class="remove-player-note">
+            Igrač će biti uklonjen samo iz ovog sastava.
+          </span>
+        </div>
+
+        <div class="remove-player-actions">
+
+          <button
+            type="button"
+            class="remove-cancel-button"
+            [disabled]="deletingPlayer"
+            (click)="cancelRemovePlayer()"
+          >
+            Otkaži
+          </button>
+
+          <button
+            type="button"
+            class="remove-confirm-button"
+            [disabled]="deletingPlayer"
+            (click)="confirmRemovePlayer()"
+          >
+            <span class="remove-spinner" *ngIf="deletingPlayer"></span>
+            <i class="fa-solid fa-trash" *ngIf="!deletingPlayer"></i>
+            {{ deletingPlayer ? 'Uklanjanje...' : 'Ukloni igrača' }}
+          </button>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+}
+

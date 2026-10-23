@@ -1,0 +1,942 @@
+<div class="players-page">
+
+  <!-- HEADER -->
+  <section class="page-header">
+
+    <div class="header-background"></div>
+
+    <div class="header-content">
+
+      <div class="team-header">
+
+        <div
+          class="team-logo"
+          [style.--team-primary]="
+            team?.primaryColor || '#2563eb'
+          "
+        >
+
+          <img
+            *ngIf="team?.logoUrl"
+            [src]="team?.logoUrl!"
+            [alt]="team?.name"
+          />
+
+          <span *ngIf="!team?.logoUrl">
+            {{ team?.name?.charAt(0) }}
+          </span>
+
+        </div>
+
+        <div class="team-info">
+
+          <div class="eyebrow">
+            <i class="fa-solid fa-shield-halved"></i>
+            TIM
+          </div>
+
+          <h1>
+            {{ team?.name }}
+          </h1>
+
+          <p>
+            Upravljanje sastavom i igračima
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- MESSAGES -->
+  <div class="messages">
+
+    <div
+      class="message success"
+      *ngIf="success"
+    >
+
+      <i class="fa-solid fa-circle-check"></i>
+
+      <span>
+        {{ success }}
+      </span>
+
+      <button
+        type="button"
+        (click)="clearMessages()"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+
+    <div
+      class="message error"
+      *ngIf="error"
+    >
+
+      <i class="fa-solid fa-circle-exclamation"></i>
+
+      <span>
+        {{ error }}
+      </span>
+
+      <button
+        type="button"
+        (click)="clearMessages()"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- STATISTICS -->
+  <section
+    class="stats-grid"
+    *ngIf="!loading"
+  >
+
+    <div class="stat-card">
+
+      <div class="stat-icon blue">
+        <i class="fa-solid fa-users"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span>
+          Ukupno igrača
+        </span>
+
+        <strong>
+          {{ players.length }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon green">
+        <i class="fa-solid fa-user-check"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span>
+          Aktivni
+        </span>
+
+        <strong>
+          {{ activePlayersCount }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon orange">
+        <i class="fa-solid fa-hand"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span>
+          Golmani
+        </span>
+
+        <strong>
+          {{ goalkeepersCount }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+  </section>
+
+
+  <!-- CONTENT -->
+  <main class="content-card">
+
+    <div class="content-header">
+
+      <div>
+
+        <span class="section-label">
+          ROSTER
+        </span>
+
+        <h2>
+          Igrači tima
+        </h2>
+
+        <p>
+          Upravljaj igračima, pozicijama i brojevima dresova.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="openCreateModal()"
+      >
+
+        <i class="fa-solid fa-plus"></i>
+
+        <span>
+          Dodaj igrača
+        </span>
+
+      </button>
+
+    </div>
+
+
+    <!-- FILTERS -->
+    <div class="filters">
+
+      <div class="search-box">
+
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="currentPage = 1"
+          placeholder="Pretraži po imenu ili broju..."
+        />
+
+        <button
+          *ngIf="searchTerm"
+          type="button"
+          (click)="searchTerm = ''; currentPage = 1"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+      </div>
+
+
+      <div class="position-filter">
+
+        <i class="fa-solid fa-filter"></i>
+
+        <select
+          [(ngModel)]="selectedPosition"
+          (ngModelChange)="currentPage = 1"
+        >
+
+          <option value="all">
+            Sve pozicije
+          </option>
+
+          <option
+            *ngFor="let position of positions"
+            [value]="position"
+          >
+            {{ position }}
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <!-- LOADING -->
+    <div
+      class="loading-state"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>
+        Učitavanje igrača...
+      </p>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div
+      class="empty-state"
+      *ngIf="
+        !loading &&
+        filteredPlayers.length === 0
+      "
+    >
+
+      <div class="empty-icon">
+
+        <i class="fa-solid fa-users-slash"></i>
+
+      </div>
+
+      <h3>
+        Nema igrača
+      </h3>
+
+      <p *ngIf="!searchTerm && selectedPosition === 'all'">
+        Ovaj tim još nema dodatih igrača.
+      </p>
+
+      <p *ngIf="searchTerm || selectedPosition !== 'all'">
+        Nema igrača koji odgovaraju izabranim filterima.
+      </p>
+
+      <button
+        *ngIf="!searchTerm && selectedPosition === 'all'"
+        type="button"
+        class="primary-button"
+        (click)="openCreateModal()"
+      >
+
+        <i class="fa-solid fa-plus"></i>
+
+        Dodaj prvog igrača
+
+      </button>
+
+    </div>
+
+
+    <!-- PLAYERS -->
+    <div
+      class="players-grid"
+      [class.paginated]="filteredPlayers.length > pageSize"
+      *ngIf="
+        !loading &&
+        filteredPlayers.length > 0
+      "
+    >
+
+      <article
+        class="player-card"
+        *ngFor="let player of paginatedPlayers"
+      >
+
+        <!-- JERSEY NUMBER -->
+        <div class="jersey-number">
+
+          <span>
+            #
+          </span>
+
+          {{
+            player.jerseyNumber ?? '—'
+          }}
+
+        </div>
+
+
+        <!-- PHOTO -->
+        <div class="player-photo">
+
+          <img
+            *ngIf="player.photoUrl"
+            [src]="player.photoUrl"
+            [alt]="getPlayerName(player)"
+          />
+
+          <span *ngIf="!player.photoUrl">
+            {{ getInitials(player) }}
+          </span>
+
+        </div>
+
+
+        <!-- PLAYER INFO -->
+        <div class="player-info">
+
+          <span
+            class="position-badge"
+            [ngClass]="
+              getPositionClass(player.position)
+            "
+          >
+
+            {{ player.position || 'Pozicija nije definisana' }}
+
+          </span>
+
+          <h3>
+            {{ player.firstName }}
+            {{ player.lastName }}
+          </h3>
+          <p>
+            {{ getPlayerName(player) }}
+          </p>
+
+
+        </div>
+
+
+        <!-- STATUS -->
+        <div class="player-status">
+
+          <span
+            class="status-dot"
+            [class.active]="player.isActive"
+          ></span>
+
+          {{
+            player.isActive
+              ? 'Aktivan'
+              : 'Neaktivan'
+          }}
+
+        </div>
+
+
+        <!-- ACTIONS -->
+        <div class="player-actions">
+
+          <button
+            type="button"
+            class="edit-button"
+            (click)="openEditModal(player)"
+            title="Izmeni igrača"
+          >
+
+            <i class="fa-solid fa-pen"></i>
+
+            <span>
+              Izmeni
+            </span>
+
+          </button>
+
+
+          <button
+            type="button"
+            class="delete-button"
+            (click)="deletePlayer(player)"
+            title="Obriši igrača"
+          >
+
+            <i class="fa-solid fa-trash"></i>
+
+          </button>
+
+        </div>
+
+      </article>
+
+    </div>
+
+    <nav
+      class="pagination"
+      *ngIf="!loading && filteredPlayers.length > pageSize"
+      aria-label="Stranice igrača"
+    >
+
+      <p class="pagination-summary">
+        Prikaz
+        <strong>{{ firstVisiblePlayer }}–{{ lastVisiblePlayer }}</strong>
+        od
+        <strong>{{ filteredPlayers.length }}</strong>
+        igrača
+      </p>
+
+      <div class="pagination-controls">
+
+        <button
+          type="button"
+          class="page-control"
+          aria-label="Prethodna stranica"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <button
+          *ngFor="let page of visiblePageNumbers"
+          type="button"
+          class="page-control page-number"
+          [class.current]="page === currentPage"
+          [attr.aria-current]="page === currentPage ? 'page' : null"
+          [attr.aria-label]="'Stranica ' + page"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          type="button"
+          class="page-control"
+          aria-label="Sledeća stranica"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+        >
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+      </div>
+
+    </nav>
+
+  </main>
+
+</div>
+
+
+<!-- MODAL -->
+<div
+  class="modal-backdrop"
+  *ngIf="showModal"
+  (click)="closeModal()"
+>
+
+  <div
+    class="player-modal"
+    (click)="$event.stopPropagation()"
+  >
+
+    <!-- MODAL HEADER -->
+    <div class="modal-header">
+
+      <div>
+
+        <span class="modal-label">
+          {{ editingPlayer ? 'UREĐIVANJE' : 'NOVI IGRAČ' }}
+        </span>
+
+        <h2>
+          {{
+            editingPlayer
+              ? 'Izmeni igrača'
+              : 'Dodaj igrača'
+          }}
+        </h2>
+
+        <p>
+          {{
+            editingPlayer
+              ? 'Ažuriraj podatke igrača.'
+              : 'Dodaj novog igrača u sastav tima.'
+          }}
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="saving"
+        (click)="closeModal()"
+      >
+
+        <i class="fa-solid fa-xmark"></i>
+
+      </button>
+
+    </div>
+
+
+    <!-- FORM -->
+    <form
+      class="player-form"
+      (ngSubmit)="savePlayer()"
+    >
+
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            Ime
+            <span>*</span>
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fa-solid fa-user"></i>
+
+            <input
+              type="text"
+              name="firstName"
+              [(ngModel)]="form.firstName"
+              placeholder="npr. Marko"
+              required
+            />
+
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Prezime
+            <span>*</span>
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fa-solid fa-user"></i>
+
+            <input
+              type="text"
+              name="lastName"
+              [(ngModel)]="form.lastName"
+              placeholder="npr. Marković"
+              required
+            />
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            Nadimak
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fa-solid fa-id-card"></i>
+
+            <input
+              type="text"
+              name="displayName"
+              [(ngModel)]="form.displayName"
+              placeholder="npr. Mare"
+            />
+
+          </div>
+
+          <div class="input-wrapper">
+
+            <i class="fa-solid fa-hashtag"></i>
+
+            <input
+              type="number"
+              name="jerseyNumber"
+              [(ngModel)]="form.jerseyNumber"
+              min="0"
+              max="99"
+              placeholder="10"
+            />
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            Pozicija
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fa-solid fa-futbol"></i>
+
+            <select
+              name="position"
+              [(ngModel)]="form.position"
+            >
+
+              <option value="">
+                Izaberi poziciju
+              </option>
+
+              <option
+                *ngFor="let position of positions"
+                [value]="position"
+              >
+                {{ position }}
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Status
+          </label>
+
+          <label class="toggle">
+
+            <input
+              type="checkbox"
+              name="isActive"
+              [(ngModel)]="form.isActive"
+            />
+
+            <span class="toggle-slider"></span>
+
+            <span class="toggle-text">
+              {{
+                form.isActive
+                  ? 'Aktivan igrač'
+                  : 'Neaktivan igrač'
+              }}
+            </span>
+
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>Fotografija igrača</label>
+
+        <div class="player-image-upload">
+          <div class="player-image-preview">
+            <img
+              *ngIf="photoPreviewUrl"
+              [src]="photoPreviewUrl"
+              [alt]="form.displayName || (form.firstName + ' ' + form.lastName)"
+            >
+            <span *ngIf="!photoPreviewUrl">
+              {{ form.firstName.charAt(0) }}{{ form.lastName.charAt(0) }}
+            </span>
+          </div>
+
+          <div class="player-image-actions">
+            <span class="selected-file-name">
+              {{ photoFile?.name || (photoPreviewUrl ? 'Fotografija je postavljena' : 'Nema izabrane fotografije') }}
+            </span>
+
+            <div class="image-upload-actions">
+              <label class="file-picker-button">
+                <i class="fa-solid fa-upload"></i>
+                Izaberi fotografiju
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  [disabled]="saving"
+                  (change)="onPhotoFileSelected($event)"
+                >
+              </label>
+
+              <button
+                type="button"
+                class="remove-image-button"
+                *ngIf="photoPreviewUrl"
+                [disabled]="saving"
+                (click)="removePhoto()"
+              >
+                Ukloni
+              </button>
+            </div>
+
+            <small>JPG, PNG, WEBP ili GIF. Maksimalna veličina 5 MB.</small>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- FORM ACTIONS -->
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="cancel-button"
+          [disabled]="saving"
+          (click)="closeModal()"
+        >
+          Otkaži
+        </button>
+
+
+        <button
+          type="submit"
+          class="save-button"
+          [disabled]="saving"
+        >
+
+          <span
+            class="button-spinner"
+            *ngIf="saving"
+          ></span>
+
+          <i
+            class="fa-solid fa-check"
+            *ngIf="!saving"
+          ></i>
+
+          {{
+            saving
+              ? 'Čuvanje...'
+              : editingPlayer
+                ? 'Sačuvaj izmene'
+                : 'Dodaj igrača'
+          }}
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+
+</div>
+  <!-- =========================================
+     DELETE PLAYER MODAL
+  ========================================= --> 
+
+  <div
+    class="delete-modal-overlay"
+    *ngIf="showDeleteModal"
+    (click)="closeDeleteModal()"
+  >
+
+    <div
+      class="delete-modal"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-player-title"
+    >
+
+      <!-- CLOSE BUTTON -->
+
+      <button
+        type="button"
+        class="delete-modal-close"
+        [disabled]="deletingPlayer"
+        (click)="closeDeleteModal()"
+        aria-label="Zatvori prozor"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+
+      <!-- WARNING ICON -->
+
+      <div class="delete-modal-icon">
+        <i class="fa-solid fa-user-minus"></i>
+      </div>
+
+
+      <!-- CONTENT -->
+
+      <div class="delete-modal-content">
+
+        <span class="delete-modal-eyebrow">
+          POTVRDA BRISANJA
+        </span>
+
+        <h2 id="delete-player-title">
+          Da li ste sigurni?
+        </h2>
+
+        <p>
+          Da li zaista želite da obrišete igrača
+          <strong>
+            {{ playerToDelete ? getPlayerName(playerToDelete) : '' }}
+          </strong>?
+        </p>
+
+        <div class="delete-warning">
+
+          <i class="fa-solid fa-circle-exclamation"></i>
+
+          <span>
+            Brisanjem igrača mogu biti obuhvaćeni i njegovi
+            povezani podaci. Ova radnja se ne može jednostavno poništiti.
+          </span>
+
+        </div>
+
+        <!-- DELETE ERROR -->
+
+        <div
+          class="delete-modal-error"
+          *ngIf="deleteError"
+        >
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>{{ deleteError }}</span>
+        </div>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="delete-modal-actions">
+
+        <button
+          type="button"
+          class="delete-cancel-button"
+          [disabled]="deletingPlayer"
+          (click)="closeDeleteModal()"
+        >
+          Otkaži
+        </button>
+
+        <button
+          type="button"
+          class="delete-confirm-button"
+          [disabled]="deletingPlayer"
+          (click)="confirmDeletePlayer()"
+        >
+
+          <span
+            class="delete-spinner"
+            *ngIf="deletingPlayer"
+          ></span>
+
+          <i
+            class="fa-solid fa-trash-can"
+            *ngIf="!deletingPlayer"
+          ></i>
+
+          {{
+            deletingPlayer
+              ? 'Brisanje...'
+              : 'Obriši igrača'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>

@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.admin-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #f5f6f7;
+}
+
+
+
+.admin-content {
+  flex: 1 0 auto;
+  min-height: calc(100vh - 72px);
+  min-height: calc(100dvh - 72px);
+
+  width: 100%;
+
+  padding-top: 72px;
+}
+
+@media (max-width: 760px) {
+
+  .admin-content {
+    min-height: calc(100vh - 64px);
+    min-height: calc(100dvh - 64px);
+    padding-top: 64px;
+  }
+}

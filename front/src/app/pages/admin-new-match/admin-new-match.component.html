@@ -1,0 +1,818 @@
+<div class="new-match-page">
+
+  <!-- HEADER -->
+  <section class="page-header">
+
+    <div class="header-glow"></div>
+
+    <div class="header-content">
+
+      <div class="header-title">
+
+        <div>
+
+          <div class="eyebrow">
+
+            <i class="fa-solid fa-calendar-plus"></i>
+
+            MATCH CENTER
+
+          </div>
+
+          <h1>
+            Nova utakmica
+          </h1>
+
+          <p>
+            Kreiraj utakmicu i dodaj je u raspored takmičenja.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- LOADING -->
+    <div
+      class="loading"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <span>
+        Učitavanje podataka...
+      </span>
+
+    </div>
+
+
+    <div
+      class="layout"
+      *ngIf="!loading"
+    >
+
+      <!-- FORM -->
+      <section class="form-card">
+
+        <div class="card-header">
+
+          <div>
+
+            <span>
+              MATCH SETUP
+            </span>
+
+            <h2>
+              Osnovni podaci
+            </h2>
+
+            <p>
+              Unesi podatke potrebne za kreiranje utakmice.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- ERROR -->
+        <div
+          class="error-box"
+          *ngIf="error"
+        >
+
+          <i
+            class="fa-solid fa-circle-exclamation"
+          ></i>
+
+          <span>
+            {{ error }}
+          </span>
+
+          <button
+            type="button"
+            (click)="clearError()"
+          >
+
+            <i class="fa-solid fa-xmark"></i>
+
+          </button>
+
+        </div>
+
+
+        <!-- SUCCESS -->
+        <div
+          class="success-box"
+          *ngIf="success"
+        >
+
+          <i
+            class="fa-solid fa-circle-check"
+          ></i>
+
+          {{ success }}
+
+        </div>
+
+
+        <form
+          class="match-form"
+          (ngSubmit)="createMatch()"
+        >
+
+
+          <!-- PHASE -->
+          <div class="form-section">
+
+            <div class="section-heading">
+
+              <div class="number">
+                01
+              </div>
+
+              <div>
+
+                <h3>
+                  Takmičenje
+                </h3>
+
+                <p>
+                  Izaberi fazu u kojoj se utakmica igra.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                Faza takmičenja
+                <span>*</span>
+              </label>
+
+              <div class="select-wrapper">
+
+                <i
+                  class="fa-solid fa-layer-group"
+                ></i>
+
+                <select
+                    name="phaseId"
+                    [(ngModel)]="form.phaseId"
+                    (ngModelChange)="loadGroupsForPhase($event)"
+                    [disabled]="lockPhaseSelection || saving"
+                >
+                    <option [ngValue]="null">Izaberi fazu...</option>
+
+                    <option
+                        *ngFor="let phase of phases"
+                        [ngValue]="phase.id"
+                    >
+                        {{ phase.name }}
+                    </option>
+                </select>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-row">
+
+              <div class="form-group">
+
+                <label>
+                  Kolo
+                </label>
+
+                <div class="input-wrapper round-input-wrapper">
+
+                  <i
+                    class="fa-solid fa-hashtag"
+                  ></i>
+
+                  <input
+                    type="number"
+                    name="round"
+                    [(ngModel)]="form.round"
+                    min="1"
+                    placeholder="npr. 5"
+                    [disabled]="saving || isKnockoutPhase(selectedPhase)"
+                  />
+
+                  <div class="round-stepper">
+                    <button
+                      type="button"
+                      aria-label="Povećaj kolo"
+                      title="Povećaj kolo"
+                      [disabled]="saving || isKnockoutPhase(selectedPhase)"
+                      (click)="adjustRound(1)"
+                    >
+                      <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+
+                    <button
+                      type="button"
+                      aria-label="Smanji kolo"
+                      title="Smanji kolo"
+                      [disabled]="saving || isKnockoutPhase(selectedPhase) || form.round === null || form.round === undefined || form.round <= 1"
+                      (click)="adjustRound(-1)"
+                    >
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="form-group" *ngIf="!isKnockoutPhase(selectedPhase)">
+
+                <label>
+                    Grupa
+                </label>
+
+                <div class="select-wrapper">
+
+                    <i class="fa-solid fa-users"></i>
+
+                    <select
+                        name="groupId"
+                        [(ngModel)]="form.groupId"
+                        (ngModelChange)="onGroupChange($event)"
+                        >
+                        <option [ngValue]="null">
+                            Bez grupe
+                        </option>
+
+                        <option
+                            *ngFor="let group of groups"
+                            [ngValue]="group.id"
+                        >
+                            {{ group.name }}
+                        </option>
+                    </select>
+
+                </div>
+
+                <small *ngIf="form.phaseId && groups.length === 0">
+                    Ova faza trenutno nema definisane grupe.
+                </small>
+
+                </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- TEAMS -->
+          <div class="form-section">
+
+            <div class="section-heading">
+
+              <div class="number">
+                02
+              </div>
+
+              <div>
+
+                <h3>
+                  Timovi
+                </h3>
+
+                <p>
+                  Odaberi domaćina i gosta.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="teams-selector">
+
+
+              <!-- HOME -->
+              <div class="team-select-card">
+
+                <span class="team-side home">
+                  DOMAĆIN
+                </span>
+
+                <div
+                  class="preview-logo"
+                  *ngIf="selectedHomeTeam"
+                >
+
+                  <img
+                    *ngIf="selectedHomeTeam.logoUrl"
+                    [src]="selectedHomeTeam.logoUrl!"
+                    [alt]="selectedHomeTeam.name"
+                  />
+
+                  <span
+                    *ngIf="!selectedHomeTeam.logoUrl"
+                  >
+                    {{ getTeamInitial(selectedHomeTeam) }}
+                  </span>
+
+                </div>
+
+
+                <div
+                  class="preview-logo empty"
+                  *ngIf="!selectedHomeTeam"
+                >
+
+                  <i class="fa-solid fa-shield-halved"></i>
+
+                </div>
+
+
+                <h4
+                  *ngIf="selectedHomeTeam"
+                >
+                  {{ selectedHomeTeam.name }}
+                </h4>
+
+                <h4
+                  class="placeholder"
+                  *ngIf="!selectedHomeTeam"
+                >
+                  Izaberi domaćina
+                </h4>
+
+
+                <div class="team-select">
+
+                  <select
+                    name="homeTeamId"
+                    [(ngModel)]="form.homeTeamId"
+                  >
+
+                    <option [ngValue]="null">
+                      Izaberi tim...
+                    </option>
+
+                    <option
+                      *ngFor="let team of availableMatchTeams"
+                      [ngValue]="team.id"
+                    >
+
+                      {{ team.name }}
+
+                    </option>
+
+                  </select>
+
+                </div>
+
+              </div>
+
+
+              <!-- VS -->
+              <div class="versus">
+
+                <span>
+                  VS
+                </span>
+
+              </div>
+
+
+              <!-- AWAY -->
+              <div class="team-select-card">
+
+                <span class="team-side away">
+                  GOST
+                </span>
+
+
+                <div
+                  class="preview-logo"
+                  *ngIf="selectedAwayTeam"
+                >
+
+                  <img
+                    *ngIf="selectedAwayTeam.logoUrl"
+                    [src]="selectedAwayTeam.logoUrl!"
+                    [alt]="selectedAwayTeam.name"
+                  />
+
+                  <span
+                    *ngIf="!selectedAwayTeam.logoUrl"
+                  >
+                    {{ getTeamInitial(selectedAwayTeam) }}
+                  </span>
+
+                </div>
+
+
+                <div
+                  class="preview-logo empty"
+                  *ngIf="!selectedAwayTeam"
+                >
+
+                  <i class="fa-solid fa-shield-halved"></i>
+
+                </div>
+
+
+                <h4
+                  *ngIf="selectedAwayTeam"
+                >
+                  {{ selectedAwayTeam.name }}
+                </h4>
+
+                <h4
+                  class="placeholder"
+                  *ngIf="!selectedAwayTeam"
+                >
+                  Izaberi gosta
+                </h4>
+
+
+                <div class="team-select">
+
+                  <select
+                    name="awayTeamId"
+                    [(ngModel)]="form.awayTeamId"
+                  >
+
+                    <option [ngValue]="null">
+                      Izaberi tim...
+                    </option>
+
+                    <option
+                      *ngFor="let team of availableAwayTeams"
+                      [ngValue]="team.id"
+                    >
+
+                      {{ team.name }}
+
+                    </option>
+
+                  </select>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- DATE -->
+          <div class="form-section">
+
+            <div class="section-heading">
+
+              <div class="number">
+                03
+              </div>
+
+              <div>
+
+                <h3>
+                  Termin
+                </h3>
+
+                <p>
+                  Kada i gde se utakmica igra?
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-row">
+
+              <div class="form-group">
+
+                <label>
+                  Datum
+                  <span>*</span>
+                </label>
+
+                <div class="input-wrapper date-input-wrapper">
+
+                <i class="fa-regular fa-calendar input-icon"></i>
+
+                <input
+                    #dateInput
+                    type="date"
+                    name="date"
+                    [(ngModel)]="form.date"
+                />
+
+                <button
+                    type="button"
+                    class="picker-button"
+                    aria-label="Izaberi datum"
+                    (click)="dateInput.showPicker()"
+                >
+                    <i class="fa-regular fa-calendar"></i>
+                </button>
+
+                </div>
+
+              </div>
+
+
+              <div class="form-group">
+
+                <label>
+                  Vreme
+                  <span>*</span>
+                </label>
+
+                <div class="input-wrapper time-input-wrapper">
+
+                    <i class="fa-regular fa-clock input-icon"></i>
+
+                    <input
+                        #timeInput
+                        type="time"
+                        name="time"
+                        [(ngModel)]="form.time"
+                    />
+
+                    <button
+                        type="button"
+                        class="picker-button"
+                        aria-label="Izaberi vreme"
+                        (click)="timeInput.showPicker()"
+                    >
+                        <i class="fa-regular fa-clock"></i>
+                    </button>
+
+                    </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                Lokacija
+              </label>
+
+              <div class="input-wrapper">
+
+                <i
+                  class="fa-solid fa-location-dot"
+                ></i>
+
+                <input
+                  type="text"
+                  name="location"
+                  [(ngModel)]="form.location"
+                  placeholder="npr. Sportski centar Intertoto"
+                />
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- ACTIONS -->
+          <div class="form-actions">
+
+            <a
+              routerLink="/admin/utakmice"
+              class="cancel-button"
+            >
+              Otkaži
+            </a>
+
+
+            <button
+              type="submit"
+              class="create-button"
+              [disabled]="saving"
+            >
+
+              <span
+                class="button-spinner"
+                *ngIf="saving"
+              ></span>
+
+              <i
+                class="fa-solid fa-plus"
+                *ngIf="!saving"
+              ></i>
+
+              {{
+                saving
+                  ? 'Kreiranje...'
+                  : 'Kreiraj utakmicu'
+              }}
+
+            </button>
+
+          </div>
+
+        </form>
+
+      </section>
+
+
+      <!-- PREVIEW -->
+      <aside class="preview-card">
+
+        <div class="preview-header">
+
+          <span>
+            PREVIEW
+          </span>
+
+          <i class="fa-solid fa-eye"></i>
+
+        </div>
+
+
+        <div class="preview-content">
+
+          <span class="preview-status">
+            ZAKAZANO
+          </span>
+
+
+          <div class="preview-date">
+
+            <strong>
+              {{
+                form.date
+                  || '--.--.----'
+              }}
+            </strong>
+
+            <span>
+              {{
+                form.time
+                  || '--:--'
+              }}
+            </span>
+
+          </div>
+
+
+          <div class="preview-teams">
+
+            <div class="preview-team">
+
+              <div class="preview-team-logo">
+
+                <img
+                  *ngIf="selectedHomeTeam?.logoUrl"
+                  [src]="selectedHomeTeam!.logoUrl!"
+                />
+
+                <span
+                  *ngIf="!selectedHomeTeam?.logoUrl"
+                >
+                  {{
+                    getTeamInitial(
+                      selectedHomeTeam
+                    )
+                  }}
+                </span>
+
+              </div>
+
+              <strong>
+                {{
+                  selectedHomeTeam?.name
+                  || 'Domaćin'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="preview-vs">
+              VS
+            </div>
+
+
+            <div class="preview-team">
+
+              <div class="preview-team-logo">
+
+                <img
+                  *ngIf="selectedAwayTeam?.logoUrl"
+                  [src]="selectedAwayTeam!.logoUrl!"
+                />
+
+                <span
+                  *ngIf="!selectedAwayTeam?.logoUrl"
+                >
+                  {{
+                    getTeamInitial(
+                      selectedAwayTeam
+                    )
+                  }}
+                </span>
+
+              </div>
+
+              <strong>
+                {{
+                  selectedAwayTeam?.name
+                  || 'Gost'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="preview-divider"></div>
+
+
+          <div class="preview-detail">
+
+            <i class="fa-solid fa-layer-group"></i>
+
+            <span>
+              Faza
+            </span>
+
+            <strong>
+
+              {{ getSelectedPhaseName() }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="preview-detail">
+
+            <i class="fa-solid fa-hashtag"></i>
+
+            <span>
+              Kolo
+            </span>
+
+            <strong>
+
+              {{
+                form.round
+                  ? form.round + '. kolo'
+                  : 'Nije izabrano'
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="preview-detail">
+
+            <i class="fa-solid fa-location-dot"></i>
+
+            <span>
+              Lokacija
+            </span>
+
+            <strong>
+
+              {{
+                form.location
+                  || 'Nije navedena'
+              }}
+
+            </strong>
+
+          </div>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+</div>

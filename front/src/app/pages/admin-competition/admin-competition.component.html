@@ -1,0 +1,1199 @@
+<div class="competition-page">
+
+  <!-- ========================================================= -->
+
+  <!-- HEADER -->
+
+  <!-- ========================================================= -->
+
+  <section class="page-header">
+
+<div class="header-glow"></div>
+
+<div class="header-content">
+
+
+  <div class="header-main">
+
+    <div>
+
+      <div class="eyebrow">
+        <i class="fa-solid fa-trophy"></i>
+        COMPETITION CENTER
+      </div>
+
+      <h1>
+        {{ competitionName }}
+      </h1>
+
+      <p>
+        Upravljanje fazama, grupama i strukturom takmičenja.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openCreatePhase()"
+    >
+
+      <i class="fa-solid fa-plus"></i>
+
+      Dodaj fazu
+
+    </button>
+
+  </div>
+
+</div>
+
+  </section>
+
+  <!-- ========================================================= -->
+
+  <!-- CONTENT -->
+
+  <!-- ========================================================= -->
+
+  <main class="content">
+
+
+<!-- ======================================================= -->
+<!-- ERROR -->
+<!-- ======================================================= -->
+
+<div
+  class="alert error"
+  *ngIf="error"
+>
+
+  <i class="fa-solid fa-circle-exclamation"></i>
+
+  <span>
+    {{ error }}
+  </span>
+
+  <button
+    type="button"
+    (click)="clearMessages()"
+    aria-label="Zatvori poruku"
+  >
+
+    <i class="fa-solid fa-xmark"></i>
+
+  </button>
+
+</div>
+
+
+<!-- ======================================================= -->
+<!-- SUCCESS -->
+<!-- ======================================================= -->
+
+<div
+  class="alert success"
+  *ngIf="success"
+>
+
+  <i class="fa-solid fa-circle-check"></i>
+
+  <span>
+    {{ success }}
+  </span>
+
+  <button
+    type="button"
+    (click)="clearMessages()"
+    aria-label="Zatvori poruku"
+  >
+
+    <i class="fa-solid fa-xmark"></i>
+
+  </button>
+
+</div>
+
+
+<!-- ======================================================= -->
+<!-- LOADING -->
+<!-- ======================================================= -->
+
+<div
+  class="loading"
+  *ngIf="loading"
+>
+
+  <div class="spinner"></div>
+
+  <span>
+    Učitavanje strukture takmičenja...
+  </span>
+
+</div>
+
+
+<!-- ======================================================= -->
+<!-- EMPTY -->
+<!-- ======================================================= -->
+
+<div
+  class="empty-state"
+  *ngIf="!loading && phases.length === 0"
+>
+
+  <div class="empty-icon">
+
+    <i class="fa-solid fa-layer-group"></i>
+
+  </div>
+
+  <h2>
+    Takmičenje još nema faze
+  </h2>
+
+  <p>
+    Dodaj prvu fazu kako bi počeo da gradiš strukturu takmičenja.
+  </p>
+
+  <button
+    type="button"
+    class="primary-button"
+    (click)="openCreatePhase()"
+  >
+
+    <i class="fa-solid fa-plus"></i>
+
+    Dodaj prvu fazu
+
+  </button>
+
+</div>
+
+
+<!-- ======================================================= -->
+<!-- PHASES -->
+<!-- ======================================================= -->
+
+<div
+  class="phases"
+  *ngIf="!loading && phases.length > 0"
+>
+
+  @for (
+    phase of phases;
+    track phase.id
+  ) {
+
+    <!-- =================================================== -->
+    <!-- PHASE CARD -->
+    <!-- =================================================== -->
+
+    <div class="phase-card">
+
+
+      <!-- ================================================= -->
+      <!-- PHASE HEADER -->
+      <!-- ================================================= -->
+
+      <div class="phase-header">
+
+        <div class="phase-title">
+
+          <div class="phase-icon">
+
+            @if (phase.type === 0) {
+
+              <i class="fa-solid fa-list-ol"></i>
+
+            } @else if (phase.type === 1) {
+
+              <i class="fa-solid fa-users"></i>
+
+            } @else if (phase.type === 2) {
+
+              <i class="fa-solid fa-shuffle"></i>
+
+            } @else if (phase.type === 3) {
+
+              <i class="fa-solid fa-sitemap"></i>
+
+            } @else {
+
+              <i class="fa-solid fa-layer-group"></i>
+
+            }
+
+          </div>
+
+          <div>
+
+            <h3>
+              {{ phase.name }}
+            </h3>
+
+            <span>
+              {{ getPhaseTypeName(phase.type) }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- PHASE ACTIONS -->
+
+        <div class="phase-actions">
+
+          <button
+            type="button"
+            class="btn-icon"
+            title="Izmeni fazu"
+            (click)="openEditPhase(phase)"
+          >
+
+            <i class="fa-solid fa-pen"></i>
+
+          </button>
+
+          <button
+            type="button"
+            class="btn-icon danger"
+            title="Obriši fazu"
+            (click)="deletePhase(phase)"
+          >
+
+            <i class="fa-solid fa-trash"></i>
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- PHASE INFO -->
+      <!-- ================================================= -->
+
+      <div class="phase-info">
+
+        <span>
+
+          <i class="fa-solid fa-diagram-project"></i>
+
+          {{ getPhaseStructureText(phase) }}
+
+        </span>
+
+        <span>
+
+          <i class="fa-solid fa-futbol"></i>
+
+          {{ phase.matchesCount }} utakmica
+
+        </span>
+
+        <span>
+
+          <i class="fa-solid fa-arrow-down-1-9"></i>
+
+          Redosled {{ phase.order }}
+
+        </span>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- GROUP PHASE -->
+      <!-- ================================================= -->
+
+      @if (phaseAllowsGroups(phase)) {
+
+        <div class="groups-section">
+
+          <!-- GROUP HEADER -->
+
+          <div class="groups-header">
+
+            <div>
+
+              <h4>
+                Grupe
+              </h4>
+
+              <span>
+                Timovi su organizovani kroz grupe ove faze.
+              </span>
+
+            </div>
+
+            <button
+              type="button"
+              class="btn-primary small"
+              (click)="openCreateGroup(phase)"
+            >
+
+              <i class="fa-solid fa-plus"></i>
+
+              Dodaj grupu
+
+            </button>
+
+          </div>
+
+
+          <!-- GROUP LIST -->
+
+          @if (getGroupsForPhase(phase.id).length > 0) {
+
+            <div class="groups-list">
+
+              @for (
+                group of getGroupsForPhase(phase.id);
+                track group.id
+              ) {
+
+                <div class="group-row">
+
+                  <!-- GROUP INFO -->
+
+                  <div class="group-main">
+
+                    <div class="group-icon">
+
+                      <i class="fa-solid fa-users"></i>
+
+                    </div>
+
+                    <div>
+
+                      <strong>
+                        {{ group.name }}
+                      </strong>
+
+                      <span>
+
+                        {{ group.teamsCount }} timova
+
+                        <span class="separator">
+                          ·
+                        </span>
+
+                        {{ group.matchesCount }} utakmica
+
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  <!-- GROUP ACTIONS -->
+
+                  <div class="group-actions">
+
+                    <button
+                      type="button"
+                      class="btn-secondary"
+                      (click)="router.navigate(['/admin/grupa', group.id])"
+                    >
+
+                      <i class="fa-solid fa-gear"></i>
+
+                      Upravljaj
+
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn-icon"
+                      title="Izmeni grupu"
+                      (click)="openEditGroup(group)"
+                    >
+
+                      <i class="fa-solid fa-pen"></i>
+
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn-icon danger"
+                      title="Obriši grupu"
+                      (click)="deleteGroup(group)"
+                    >
+
+                      <i class="fa-solid fa-trash"></i>
+
+                    </button>
+
+                  </div>
+
+                </div>
+
+              }
+
+            </div>
+
+          } @else {
+
+            <!-- EMPTY GROUPS -->
+
+            <div class="empty-groups">
+
+              <div class="empty-groups-icon">
+
+                <i class="fa-solid fa-users-slash"></i>
+
+              </div>
+
+              <div>
+
+                <strong>
+                  Ova faza još nema grupa
+                </strong>
+
+                <span>
+                  Dodaj prvu grupu da bi mogao da rasporediš timove.
+                </span>
+
+              </div>
+
+              <button
+                type="button"
+                class="btn-primary small"
+                (click)="openCreateGroup(phase)"
+              >
+
+                <i class="fa-solid fa-plus"></i>
+
+                Dodaj grupu
+
+              </button>
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+
+      <!-- ================================================= -->
+      <!-- MANUAL KNOCKOUT -->
+      <!-- ================================================= -->
+
+      @if (phase.type === 3) {
+
+        <div class="knockout-info">
+
+          <div class="knockout-icon">
+
+            <i class="fa-solid fa-sitemap"></i>
+
+          </div>
+
+          <div class="knockout-content">
+
+            <strong>
+              {{ phase.name }}
+            </strong>
+
+            <span>
+              Ova faza nema grupe. Utakmice i klubove
+              administrator dodaje potpuno ručno.
+            </span>
+
+          </div>
+
+          <div class="knockout-status">
+
+            <i class="fa-solid fa-circle-check"></i>
+
+            Ručno upravljanje
+
+          </div>
+
+        </div>
+
+
+        <!-- KNOCKOUT MATCHES -->
+
+        <div class="knockout-matches">
+
+          <div class="knockout-matches-header">
+
+            <div>
+
+              <h4>
+                Utakmice faze
+              </h4>
+
+              <span>
+                {{ phase.matchesCount }} utakmica
+              </span>
+
+            </div>
+
+            <div class="knockout-actions">
+
+              <button
+                type="button"
+                class="btn-secondary"
+                [routerLink]="['/admin/knockout-utakmice']"
+                [queryParams]="{
+                  phaseId: phase.id,
+                  phaseName: phase.name
+                }"
+              >
+                <i class="fa-solid fa-gear"></i>
+                Upravljaj
+              </button>
+
+              <button
+                type="button"
+                class="btn-primary small"
+                [routerLink]="['/admin/utakmice/nova']"
+                [queryParams]="{ phaseId: phase.id }"
+              >
+                <i class="fa-solid fa-plus"></i>
+                Dodaj utakmicu
+              </button>
+
+
+
+            </div>
+
+          </div>
+
+
+          <div class="knockout-note">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            <span>
+              Učesnici se ne određuju automatski.
+              Ti kao administrator sam biraš klubove
+              za svaku utakmicu ove faze.
+            </span>
+
+          </div>
+
+        </div>
+
+      }
+
+
+      <!-- ================================================= -->
+      <!-- CUSTOM -->
+      <!-- ================================================= -->
+
+      @if (
+        phase.type !== 0 &&
+        phase.type !== 1 &&
+        phase.type !== 2 &&
+        phase.type !== 3
+      ) {
+
+        <div class="custom-phase-info">
+
+          <div class="custom-phase-icon">
+
+            <i class="fa-solid fa-sliders"></i>
+
+          </div>
+
+          <div>
+
+            <strong>
+              Prilagođena faza
+            </strong>
+
+            <span>
+              Ova faza nema automatsku strukturu.
+              Utakmice i učesnike podešava administrator ručno.
+            </span>
+
+          </div>
+
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+</div>
+
+
+  </main>
+
+  <!-- ========================================================= -->
+
+  <!-- PHASE MODAL -->
+
+  <!-- ========================================================= -->
+
+  <div
+    class="modal-overlay"
+    *ngIf="showPhaseForm"
+    (click)="cancelPhaseForm()"
+  >
+
+
+<div
+  class="modal"
+  (click)="$event.stopPropagation()"
+>
+
+  <!-- MODAL HEADER -->
+
+  <div class="modal-header">
+
+    <div>
+
+      <span>
+        PHASE SETUP
+      </span>
+
+      <h2>
+
+        {{
+          editingPhaseId
+            ? 'Izmeni fazu'
+            : 'Nova faza'
+        }}
+
+      </h2>
+
+    </div>
+
+    <button
+      type="button"
+      (click)="cancelPhaseForm()"
+      aria-label="Zatvori"
+    >
+
+      <i class="fa-solid fa-xmark"></i>
+
+    </button>
+
+  </div>
+
+
+  <!-- MODAL BODY -->
+
+  <div class="modal-body">
+
+    <!-- NAME -->
+
+    <div class="form-group">
+
+      <label>
+
+        Naziv faze
+
+        <span>
+          *
+        </span>
+
+      </label>
+
+      <div class="input-wrapper">
+
+        <i class="fa-solid fa-layer-group"></i>
+
+        <input
+          type="text"
+          [(ngModel)]="phaseForm.name"
+          placeholder="npr. Ligaški deo"
+        />
+
+      </div>
+
+    </div>
+
+
+    <!-- ORDER + TYPE -->
+
+    <div class="form-row">
+
+      <div class="form-group">
+
+        <label>
+          Redosled
+        </label>
+
+        <div class="input-wrapper">
+
+          <i class="fa-solid fa-hashtag"></i>
+
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="phaseForm.order"
+          />
+
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Tip faze
+        </label>
+
+        <div class="select-wrapper">
+
+          <i class="fa-solid fa-diagram-project"></i>
+
+          <select
+            [(ngModel)]="phaseForm.type"
+          >
+
+            <option
+              *ngFor="let type of phaseTypes"
+              [ngValue]="type.value"
+            >
+
+              {{ type.label }}
+
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- TYPE INFORMATION -->
+
+    <div class="phase-type-hint">
+
+      @if (phaseForm.type === 0) {
+
+        <i class="fa-solid fa-list-ol"></i>
+
+        <div>
+
+          <strong>
+            Ligaška faza
+          </strong>
+
+          <span>
+            Ova faza može sadržati grupe i ligaške utakmice.
+          </span>
+
+        </div>
+
+      } @else if (phaseForm.type === 1) {
+
+        <i class="fa-solid fa-users"></i>
+
+        <div>
+
+          <strong>
+            Grupna faza
+          </strong>
+
+          <span>
+            Ova faza je organizovana kroz grupe.
+          </span>
+
+        </div>
+
+      } @else if (phaseForm.type === 2) {
+
+        <i class="fa-solid fa-shuffle"></i>
+
+        <div>
+
+          <strong>
+            Playoff
+          </strong>
+
+          <span>
+            Playoff može sadržati sopstvene grupe.
+          </span>
+
+        </div>
+
+      } @else if (phaseForm.type === 3) {
+
+        <i class="fa-solid fa-sitemap"></i>
+
+        <div>
+
+          <strong>
+            Knockout faza
+          </strong>
+
+          <span>
+            Ova faza nema grupe. Utakmice i klubove
+            administrator dodaje ručno.
+          </span>
+
+        </div>
+
+      } @else {
+
+        <i class="fa-solid fa-sliders"></i>
+
+        <div>
+
+          <strong>
+            Custom faza
+          </strong>
+
+          <span>
+            Prilagođena faza kojom administrator upravlja ručno.
+          </span>
+
+        </div>
+
+      }
+
+    </div>
+
+  </div>
+
+
+  <!-- MODAL ACTIONS -->
+
+  <div class="modal-actions">
+
+    <button
+      type="button"
+      class="cancel-button"
+      (click)="cancelPhaseForm()"
+    >
+
+      Otkaži
+
+    </button>
+
+    <button
+      type="button"
+      class="primary-button"
+      [disabled]="saving"
+      (click)="savePhase()"
+    >
+
+      <span
+        class="button-spinner"
+        *ngIf="saving"
+      ></span>
+
+      <i
+        class="fa-solid fa-check"
+        *ngIf="!saving"
+      ></i>
+
+      Sačuvaj
+
+    </button>
+
+  </div>
+
+</div>
+
+
+  </div>
+
+  <!-- ========================================================= -->
+
+  <!-- GROUP MODAL -->
+
+  <!-- ========================================================= -->
+
+  <div
+    class="modal-overlay"
+    *ngIf="showGroupForm"
+    (click)="cancelGroupForm()"
+  >
+
+
+<div
+  class="modal"
+  (click)="$event.stopPropagation()"
+>
+
+  <!-- MODAL HEADER -->
+
+  <div class="modal-header">
+
+    <div>
+
+      <span>
+        GROUP SETUP
+      </span>
+
+      <h2>
+
+        {{
+          editingGroupId
+            ? 'Izmeni grupu'
+            : 'Nova grupa'
+        }}
+
+      </h2>
+
+    </div>
+
+    <button
+      type="button"
+      (click)="cancelGroupForm()"
+      aria-label="Zatvori"
+    >
+
+      <i class="fa-solid fa-xmark"></i>
+
+    </button>
+
+  </div>
+
+
+  <!-- MODAL BODY -->
+
+  <div class="modal-body">
+
+    <!-- GROUP NAME -->
+
+    <div class="form-group">
+
+      <label>
+
+        Grupa
+
+        <span>
+          *
+        </span>
+
+      </label>
+
+      <div class="input-wrapper">
+
+        <i class="fa-solid fa-users"></i>
+
+        <input
+          type="text"
+          [(ngModel)]="groupForm.name"
+          placeholder="npr. Grupa A"
+        />
+
+      </div>
+
+    </div>
+
+
+    <!-- ORDER -->
+
+    <div class="form-group">
+
+      <label>
+        Redosled
+      </label>
+
+      <div class="input-wrapper">
+
+        <i class="fa-solid fa-hashtag"></i>
+
+        <input
+          type="number"
+          min="1"
+          [(ngModel)]="groupForm.order"
+        />
+
+      </div>
+
+    </div>
+
+
+    <!-- GROUP INFO -->
+
+    <div class="group-modal-hint">
+
+      <i class="fa-solid fa-circle-info"></i>
+
+      <span>
+        Nakon kreiranja grupe možeš otvoriti grupu i
+        ručno dodavati timove i njihove seed pozicije.
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- MODAL ACTIONS -->
+
+  <div class="modal-actions">
+
+    <button
+      type="button"
+      class="cancel-button"
+      (click)="cancelGroupForm()"
+    >
+
+      Otkaži
+
+    </button>
+
+    <button
+      type="button"
+      class="primary-button"
+      [disabled]="saving"
+      (click)="saveGroup()"
+    >
+
+      <span
+        class="button-spinner"
+        *ngIf="saving"
+      ></span>
+
+      <i
+        class="fa-solid fa-check"
+        *ngIf="!saving"
+      ></i>
+
+      Sačuvaj
+
+    </button>
+
+  </div>
+
+</div>
+
+  </div>
+
+</div>
+
+<div
+  class="modal-overlay phase-delete-overlay"
+  *ngIf="phaseToDelete as phase"
+  (click)="cancelDeletePhase()"
+>
+
+  <section
+    class="modal phase-delete-modal"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="delete-phase-title"
+    aria-describedby="delete-phase-message"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="phase-delete-icon">
+      <i class="fa-solid fa-trash-can"></i>
+    </div>
+
+    <span class="phase-delete-eyebrow">POTVRDA BRISANJA</span>
+
+    <h2 id="delete-phase-title">Obrisati fazu?</h2>
+
+    <p id="delete-phase-message">
+      Da li želiš da obrišeš fazu
+      <strong>{{ phase.name }}</strong>?
+    </p>
+
+    <div class="phase-delete-note">
+      <i class="fa-solid fa-circle-info"></i>
+      <span>Obrisaće se sve grupe, utakmice i članstva timova u grupama ove faze. Sami timovi ostaju u sistemu.</span>
+    </div>
+
+    <div class="modal-actions phase-delete-actions">
+
+      <button
+        type="button"
+        class="cancel-button"
+        [disabled]="deletingPhase"
+        (click)="cancelDeletePhase()"
+      >
+        Otkaži
+      </button>
+
+      <button
+        type="button"
+        class="primary-button phase-delete-confirm"
+        [disabled]="deletingPhase"
+        (click)="confirmDeletePhase()"
+      >
+        <span class="button-spinner" *ngIf="deletingPhase"></span>
+        <i class="fa-solid fa-trash" *ngIf="!deletingPhase"></i>
+        {{ deletingPhase ? 'Brisanje...' : 'Obriši fazu' }}
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+<div
+  class="modal-overlay phase-delete-overlay"
+  *ngIf="groupToDelete as group"
+  (click)="cancelDeleteGroup()"
+>
+
+  <section
+    class="modal phase-delete-modal"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="delete-group-title"
+    aria-describedby="delete-group-message"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="phase-delete-icon">
+      <i class="fa-solid fa-users-slash"></i>
+    </div>
+
+    <span class="phase-delete-eyebrow">POTVRDA BRISANJA</span>
+
+    <h2 id="delete-group-title">Obrisati grupu?</h2>
+
+    <p id="delete-group-message">
+      Da li želiš da obrišeš grupu
+      <strong>{{ group.name }}</strong>?
+    </p>
+
+    <div class="phase-delete-note">
+      <i class="fa-solid fa-circle-info"></i>
+      <span>Obrisaće se sve utakmice i članstva timova u ovoj grupi. Sami timovi ostaju u sistemu.</span>
+    </div>
+
+    <div class="modal-actions phase-delete-actions">
+
+      <button
+        type="button"
+        class="cancel-button"
+        [disabled]="deletingGroup"
+        (click)="cancelDeleteGroup()"
+      >
+        Otkaži
+      </button>
+
+      <button
+        type="button"
+        class="primary-button phase-delete-confirm"
+        [disabled]="deletingGroup"
+        (click)="confirmDeleteGroup()"
+      >
+        <span class="button-spinner" *ngIf="deletingGroup"></span>
+        <i class="fa-solid fa-trash" *ngIf="!deletingGroup"></i>
+        {{ deletingGroup ? 'Brisanje...' : 'Obriši grupu' }}
+      </button>
+
+    </div>
+
+  </section>
+
+</div>

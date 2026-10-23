@@ -1,0 +1,536 @@
+<section class="statistics-page">
+
+  <!-- ===================================================== -->
+  <!-- HERO -->
+  <!-- ===================================================== -->
+
+  <div class="statistics-hero">
+
+    <div class="container">
+
+      <span class="eyebrow">
+        STATISTIKA
+      </span>
+
+      <h1>
+        Statistika igrača
+      </h1>
+
+      <p>
+        Pregled golova i asistencija
+        u izabranom takmičenju.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div class="container statistics-content">
+
+    <!-- =================================================== -->
+    <!-- COMPETITION FILTER -->
+    <!-- =================================================== -->
+
+    <section
+      class="competition-filter"
+      *ngIf="!loadingCompetitions"
+    >
+
+      <div class="filter-left">
+
+        <div class="filter-icon">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+
+        <div>
+
+          <span class="filter-label">
+            TAKMIČENJE
+          </span>
+
+          <strong>
+            Izaberi takmičenje
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="filter-select-wrapper">
+
+        <select
+          [(ngModel)]="selectedCompetitionId"
+          (ngModelChange)="onCompetitionChange()"
+          [disabled]="loadingStatistics"
+          aria-label="Izaberi takmičenje"
+        >
+
+          <option
+            *ngFor="let competition of competitions"
+            [ngValue]="competition.id"
+          >
+            {{ competition.name }}
+          </option>
+
+        </select>
+
+        <i class="fa-solid fa-chevron-down"></i>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- LOADING COMPETITIONS -->
+    <!-- =================================================== -->
+
+    <div
+      class="state-box"
+      *ngIf="loadingCompetitions"
+    >
+
+      <div class="spinner"></div>
+
+      <strong>
+        Učitavanje takmičenja...
+      </strong>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- ERROR -->
+    <!-- =================================================== -->
+
+    <div
+      class="error-box"
+      *ngIf="!loadingCompetitions && errorMessage"
+    >
+
+      <i class="fa-solid fa-triangle-exclamation"></i>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- NO COMPETITIONS -->
+    <!-- =================================================== -->
+
+    <div
+      class="state-box"
+      *ngIf="
+        !loadingCompetitions &&
+        !errorMessage &&
+        competitions.length === 0
+      "
+    >
+
+      <div class="empty-icon">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+
+      <strong>
+        Nema aktivnih takmičenja
+      </strong>
+
+      <span>
+        Trenutno nema aktivnog takmičenja
+        za koje je dostupna statistika.
+      </span>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- STATISTICS -->
+    <!-- =================================================== -->
+
+    <ng-container
+      *ngIf="
+        !loadingCompetitions &&
+        !errorMessage &&
+        statistics
+      "
+    >
+
+      <!-- ================================================ -->
+      <!-- SELECTED COMPETITION -->
+      <!-- ================================================ -->
+
+      <div class="competition-heading">
+
+        <div>
+
+          <span>
+            AKTIVNO TAKMIČENJE
+          </span>
+
+          <h2>
+            {{ statistics.competitionName }}
+          </h2>
+
+        </div>
+
+        <div class="competition-id">
+          #{{ statistics.competitionId }}
+        </div>
+
+      </div>
+
+
+      <!-- ================================================ -->
+      <!-- LOADING STATISTICS -->
+      <!-- ================================================ -->
+
+      <div
+        class="statistics-loading"
+        *ngIf="loadingStatistics"
+      >
+
+        <div class="spinner"></div>
+
+        <span>
+          Učitavanje statistike...
+        </span>
+
+      </div>
+
+
+      <!-- ================================================ -->
+      <!-- TABLES -->
+      <!-- ================================================ -->
+
+      <div
+        class="statistics-grid"
+        *ngIf="!loadingStatistics"
+      >
+
+        <!-- ============================================== -->
+        <!-- GOALS -->
+        <!-- ============================================== -->
+
+        <section class="stat-card">
+
+          <header class="stat-card-header">
+
+            <div class="stat-title">
+
+              <div class="stat-icon goals">
+                <i class="fa-solid fa-futbol"></i>
+              </div>
+
+              <div>
+
+                <span>
+                  NAJBOLJI STRELCI
+                </span>
+
+                <h3>
+                  Golovi
+                </h3>
+
+              </div>
+
+            </div>
+
+            <span class="stat-count">
+              {{ statistics.topScorers.length }}
+            </span>
+
+          </header>
+
+
+          <div
+            class="players-list"
+            *ngIf="hasScorers"
+          >
+
+            <div
+              class="player-row"
+              *ngFor="
+                let player of paginatedScorers;
+                let i = index
+              "
+            >
+
+              <div class="rank">
+                {{ (scorersPage - 1) * pageSize + i + 1 }}
+              </div>
+
+
+              <div class="player-avatar">
+
+                <img
+                  *ngIf="player.photoUrl"
+                  [src]="getPlayerPhotoUrl(player.photoUrl)"
+                  [alt]="player.playerName"
+                />
+
+                <span *ngIf="!player.photoUrl">
+                  {{ getPlayerInitials(player) }}
+                </span>
+
+              </div>
+
+
+              <div class="player-info">
+
+                <strong>
+                  {{ player.playerName }}
+                </strong>
+
+                <span>
+                  {{ player.teamName }}
+                </span>
+
+              </div>
+
+
+              <div class="team-logo">
+
+                <img
+                  *ngIf="player.teamLogoUrl"
+                  [src]="getTeamLogoUrl(player.teamLogoUrl)"
+                  [alt]="player.teamName"
+                />
+
+                <i
+                  *ngIf="!player.teamLogoUrl"
+                  class="fa-solid fa-shield-halved"
+                ></i>
+
+              </div>
+
+
+              <div class="stat-value">
+
+                <strong>
+                  {{ player.goals }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <nav class="stat-pagination" *ngIf="scorersTotalPages > 1" aria-label="Paginacija strelaca">
+            <button
+              type="button"
+              class="pagination-arrow"
+              [disabled]="scorersPage === 1"
+              (click)="goToScorersPage(scorersPage - 1)"
+              aria-label="Prethodna strana strelaca"
+            ><i class="fa-solid fa-chevron-left"></i></button>
+            <ng-container *ngFor="let page of scorersPaginationItems">
+              <span class="pagination-ellipsis" *ngIf="page === 'ellipsis'">…</span>
+              <button
+                type="button"
+                class="pagination-page"
+                *ngIf="page !== 'ellipsis'"
+                [class.active]="scorersPage === page"
+                [attr.aria-current]="scorersPage === page ? 'page' : null"
+                (click)="goToScorersPage(page)"
+              >{{ page }}</button>
+            </ng-container>
+            <button
+              type="button"
+              class="pagination-arrow"
+              [disabled]="scorersPage === scorersTotalPages"
+              (click)="goToScorersPage(scorersPage + 1)"
+              aria-label="Sledeća strana strelaca"
+            ><i class="fa-solid fa-chevron-right"></i></button>
+          </nav>
+
+          <div
+            class="empty-list"
+            *ngIf="!hasScorers"
+          >
+
+            <i class="fa-solid fa-futbol"></i>
+
+            <strong>
+              Nema golova
+            </strong>
+
+            <span>
+              Još nema igrača sa postignutim golom.
+            </span>
+
+          </div>
+
+        </section>
+
+
+        <!-- ============================================== -->
+        <!-- ASSISTS -->
+        <!-- ============================================== -->
+
+        <section class="stat-card">
+
+          <header class="stat-card-header">
+
+            <div class="stat-title">
+
+              <div class="stat-icon assists">
+                <i class="fa-solid fa-handshake"></i>
+              </div>
+
+              <div>
+
+                <span>
+                  NAJBOLJI ASISTENTI
+                </span>
+
+                <h3>
+                  Asistencije
+                </h3>
+
+              </div>
+
+            </div>
+
+            <span class="stat-count">
+              {{ statistics.topAssists.length }}
+            </span>
+
+          </header>
+
+
+          <div
+            class="players-list"
+            *ngIf="hasAssists"
+          >
+
+            <div
+              class="player-row"
+              *ngFor="
+                let player of paginatedAssists;
+                let i = index
+              "
+            >
+
+              <div class="rank">
+                {{ (assistsPage - 1) * pageSize + i + 1 }}
+              </div>
+
+
+              <div class="player-avatar">
+
+                <img
+                  *ngIf="player.photoUrl"
+                  [src]="getPlayerPhotoUrl(player.photoUrl)"
+                  [alt]="player.playerName"
+                />
+
+                <span *ngIf="!player.photoUrl">
+                  {{ getPlayerInitials(player) }}
+                </span>
+
+              </div>
+
+
+              <div class="player-info">
+
+                <strong>
+                  {{ player.playerName }}
+                </strong>
+
+                <span>
+                  {{ player.teamName }}
+                </span>
+
+              </div>
+
+
+              <div class="team-logo">
+
+                <img
+                  *ngIf="player.teamLogoUrl"
+                  [src]="getTeamLogoUrl(player.teamLogoUrl)"
+                  [alt]="player.teamName"
+                />
+
+                <i
+                  *ngIf="!player.teamLogoUrl"
+                  class="fa-solid fa-shield-halved"
+                ></i>
+
+              </div>
+
+
+              <div class="stat-value">
+
+                <strong>
+                  {{ player.assists }}
+                </strong>
+                
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <nav class="stat-pagination" *ngIf="assistsTotalPages > 1" aria-label="Paginacija asistencija">
+            <button
+              type="button"
+              class="pagination-arrow"
+              [disabled]="assistsPage === 1"
+              (click)="goToAssistsPage(assistsPage - 1)"
+              aria-label="Prethodna strana asistencija"
+            ><i class="fa-solid fa-chevron-left"></i></button>
+            <ng-container *ngFor="let page of assistsPaginationItems">
+              <span class="pagination-ellipsis" *ngIf="page === 'ellipsis'">…</span>
+              <button
+                type="button"
+                class="pagination-page"
+                *ngIf="page !== 'ellipsis'"
+                [class.active]="assistsPage === page"
+                [attr.aria-current]="assistsPage === page ? 'page' : null"
+                (click)="goToAssistsPage(page)"
+              >{{ page }}</button>
+            </ng-container>
+            <button
+              type="button"
+              class="pagination-arrow"
+              [disabled]="assistsPage === assistsTotalPages"
+              (click)="goToAssistsPage(assistsPage + 1)"
+              aria-label="Sledeća strana asistencija"
+            ><i class="fa-solid fa-chevron-right"></i></button>
+          </nav>
+
+          <div
+            class="empty-list"
+            *ngIf="!hasAssists"
+          >
+
+            <i class="fa-solid fa-handshake"></i>
+
+            <strong>
+              Nema asistencija
+            </strong>
+
+            <span>
+              Još nema igrača sa zabeleženom asistencijom.
+            </span>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    </ng-container>
+
+  </div>
+
+</section>

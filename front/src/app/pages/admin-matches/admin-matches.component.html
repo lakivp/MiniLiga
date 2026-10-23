@@ -1,0 +1,696 @@
+<div class="matches-page">
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+
+    <div class="header-glow"></div>
+
+    <div class="header-content">
+
+      <div class="title-row">
+
+        <div>
+
+          <div class="eyebrow">
+            <i class="fa-solid fa-calendar-days"></i>
+            COMPETITION CENTER
+          </div>
+
+          <h1>
+            Utakmice
+          </h1>
+
+          <p>
+            Pregled, organizacija i vođenje utakmica.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- STATISTICS -->
+  <section class="stats-wrapper">
+
+    <div class="stat-card">
+
+      <div class="stat-icon blue">
+        <i class="fa-solid fa-calendar"></i>
+      </div>
+
+      <div>
+
+        <span>
+          Ukupno
+        </span>
+
+        <strong>
+          {{ matches.length }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon orange">
+        <i class="fa-regular fa-clock"></i>
+      </div>
+
+      <div>
+
+        <span>
+          Zakazano
+        </span>
+
+        <strong>
+          {{ scheduledCount }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="stat-card live-stat">
+
+      <div class="stat-icon red">
+        <span class="live-pulse"></span>
+        <i class="fa-solid fa-tower-broadcast"></i>
+      </div>
+
+      <div>
+
+        <span>
+          Uživo
+        </span>
+
+        <strong>
+          {{ liveCount }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon green">
+        <i class="fa-solid fa-flag-checkered"></i>
+      </div>
+
+      <div>
+
+        <span>
+          Završeno
+        </span>
+
+        <strong>
+          {{ finishedCount }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- TOOLBAR -->
+    <section class="toolbar">
+
+      <div class="toolbar-title">
+
+        <span class="label">
+          FIXTURES
+        </span>
+
+        <h2>
+          {{ phaseFilterName || 'Raspored utakmica' }}
+        </h2>
+
+      </div>
+
+
+      <div class="filters">
+
+        <div class="search">
+
+          <i class="fa-solid fa-magnifying-glass"></i>
+
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="currentPage = 1"
+            placeholder="Pretraži tim ili lokaciju..."
+          />
+
+        </div>
+
+        <select
+          [(ngModel)]="selectedCompetitionId"
+          (ngModelChange)="onCompetitionChange()"
+          [disabled]="competitions.length === 0"
+          aria-label="Filtriraj po takmičenju"
+        >
+
+          <option
+            *ngIf="competitions.length === 0"
+            [ngValue]="null"
+          >
+            Nema takmičenja
+          </option>
+
+          <option
+            *ngFor="let competition of competitions"
+            [ngValue]="competition.id"
+          >
+            {{ competition.name }}
+          </option>
+
+        </select>
+
+        <select
+          [(ngModel)]="selectedPhaseId"
+          (ngModelChange)="onPhaseChange()"
+          [disabled]="availablePhases.length === 0"
+          aria-label="Filtriraj po fazi takmičenja"
+        >
+          <option
+            *ngFor="let phase of availablePhases"
+            [ngValue]="phase.id"
+          >
+            {{ phase.name }}
+          </option>
+        </select>
+
+        <select
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="currentPage = 1"
+        >
+
+          <option value="all">
+            Svi statusi
+          </option>
+
+          <option value="0">
+            Zakazane
+          </option>
+
+          <option value="1">
+            Uživo
+          </option>
+
+          <option value="2">
+            Završene
+          </option>
+
+        </select>
+
+
+        <select
+          *ngIf="phaseFilterId === null && !isKnockoutPhase"
+          [(ngModel)]="selectedRound"
+          (ngModelChange)="currentPage = 1"
+        >
+
+          <option value="all">
+            Sva kola
+          </option>
+
+          <option
+            *ngFor="let round of rounds"
+            [value]="round"
+          >
+            {{ round }}. kolo
+          </option>
+
+        </select>
+
+      </div>
+
+    </section>
+
+
+    <!-- ERROR -->
+    <div
+      class="error-box"
+      *ngIf="error"
+    >
+
+      <i class="fa-solid fa-circle-exclamation"></i>
+
+      <span>
+        {{ error }}
+      </span>
+
+      <button
+        type="button"
+        (click)="loadMatches()"
+      >
+        Pokušaj ponovo
+      </button>
+
+    </div>
+
+
+    <!-- LOADING -->
+    <div
+      class="loading"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <span>
+        Učitavanje utakmica...
+      </span>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div
+      class="empty"
+      *ngIf="
+        !loading &&
+        !error &&
+        filteredMatches.length === 0
+      "
+    >
+
+      <div class="empty-icon">
+
+        <i class="fa-regular fa-calendar-xmark"></i>
+
+      </div>
+
+      <h3>
+        Nema utakmica
+      </h3>
+
+      <p>
+        Trenutno nema utakmica koje odgovaraju izabranim filterima.
+      </p>
+
+    </div>
+
+
+    <!-- MATCHES -->
+    <div
+      class="matches-list"
+      [class.paginated]="filteredMatches.length > pageSize"
+      *ngIf="
+        !loading &&
+        filteredMatches.length > 0
+      "
+    >
+
+      <article
+        class="match-row"
+        *ngFor="
+          let match of paginatedMatches;
+          trackBy: trackByMatch
+        "
+      >
+
+        <!-- DATE -->
+        <div class="match-date">
+
+          <strong>
+            {{ formatTime(match.matchDate) }}
+          </strong>
+
+          <span>
+            {{ formatDate(match.matchDate) }}
+          </span>
+
+          <small
+            *ngIf="match.round"
+          >
+            {{ match.round }}. KOLO
+          </small>
+
+        </div>
+
+
+        <!-- TEAMS -->
+        <div class="teams">
+
+          <div class="team home">
+
+            <span class="team-name">
+              {{ getTeamName(match.homeTeam) }}
+            </span>
+
+            <div class="team-logo">
+
+              <img
+                *ngIf="getTeamLogo(match.homeTeam)"
+                [src]="getTeamLogo(match.homeTeam)!"
+                [alt]="getTeamName(match.homeTeam)"
+              />
+
+              <span
+                *ngIf="!getTeamLogo(match.homeTeam)"
+              >
+                {{ getTeamInitial(match.homeTeam) }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="score">
+
+            <ng-container
+              *ngIf="
+                match.status === 2 ||
+                match.status === 1 ||
+                match.isLive
+              "
+            >
+
+              <strong>
+                {{ match.homeScore }}
+              </strong>
+
+              <span>
+                :
+              </span>
+
+              <strong>
+                {{ match.awayScore }}
+              </strong>
+
+            </ng-container>
+
+
+            <span
+              class="vs"
+              *ngIf="
+                match.status === 0 ||
+                match.status === 3 ||
+                match.status === 4
+              "
+            >
+              VS
+            </span>
+
+          </div>
+
+
+          <div class="team away">
+
+            <div class="team-logo">
+
+              <img
+                *ngIf="getTeamLogo(match.awayTeam)"
+                [src]="getTeamLogo(match.awayTeam)!"
+                [alt]="getTeamName(match.awayTeam)"
+              />
+
+              <span
+                *ngIf="!getTeamLogo(match.awayTeam)"
+              >
+                {{ getTeamInitial(match.awayTeam) }}
+              </span>
+
+            </div>
+
+            <span class="team-name">
+              {{ getTeamName(match.awayTeam) }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- STATUS -->
+        <div class="status-column">
+
+          <span
+            class="status"
+            [ngClass]="
+              getMatchStatusClass(match)
+            "
+          >
+
+            <span
+              class="status-dot"
+              *ngIf="
+                match.isLive ||
+                match.status === 1
+              "
+            ></span>
+
+            {{ getMatchStatusText(match) }}
+
+          </span>
+
+          <span
+            class="location"
+            *ngIf="match.location"
+          >
+
+            <i class="fa-solid fa-location-dot"></i>
+
+            {{ match.location }}
+
+          </span>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+        <div class="actions">
+
+          <a
+            [routerLink]="[
+              '/admin/utakmica',
+              match.id
+            ]"
+            class="action-main"
+          >
+
+            <i
+              class="fa-solid"
+              [ngClass]="
+                match.isLive ||
+                match.status === 1
+                  ? 'fa-tower-broadcast'
+                  : 'fa-clipboard-list'
+              "
+            ></i>
+
+            <span>
+              {{
+                match.isLive ||
+                match.status === 1
+                  ? 'Live zapisnik'
+                  : 'Zapisnik'
+              }}
+            </span>
+
+          </a>
+
+
+          <a
+            [routerLink]="[
+              '/admin/utakmica',
+              match.id,
+              'sastav'
+            ]"
+            class="action-icon"
+            title="Sastav"
+          >
+
+            <i class="fa-solid fa-users"></i>
+
+          </a>
+
+
+          <a
+            [routerLink]="[
+              '/utakmica',
+              match.id
+            ]"
+            target="_blank"
+            class="action-icon"
+            title="Javni prikaz"
+          >
+
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+
+          </a>
+
+        </div>
+
+      </article>
+
+    </div>
+
+    <nav
+      class="matches-pagination"
+      *ngIf="!loading && filteredMatches.length > pageSize"
+      aria-label="Stranice utakmica"
+    >
+
+      <p class="pagination-summary">
+        Prikaz
+        <strong>{{ firstVisibleMatch }}–{{ lastVisibleMatch }}</strong>
+        od
+        <strong>{{ filteredMatches.length }}</strong>
+        utakmica
+      </p>
+
+
+    <div class="pagination-controls">
+
+      <!-- Prethodna stranica -->
+      <button
+        type="button"
+        class="page-control"
+        aria-label="Prethodna stranica"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)"
+      >
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <!-- Prve tri stranice kada smo na početku -->
+      <ng-container *ngIf="totalPages <= 3">
+        <button
+          *ngFor="let page of visiblePageNumbers"
+          type="button"
+          class="page-control page-number"
+          [class.current]="page === currentPage"
+          [attr.aria-current]="page === currentPage ? 'page' : null"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <!-- Više od tri stranice -->
+      <ng-container *ngIf="totalPages > 3">
+
+        <!-- Prikaz na početku -->
+        <ng-container *ngIf="currentPage <= 2">
+          <button
+            *ngFor="let page of visiblePageNumbers"
+            type="button"
+            class="page-control page-number"
+            [class.current]="page === currentPage"
+            [attr.aria-current]="page === currentPage ? 'page' : null"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <span class="pagination-dots">...</span>
+
+          <button
+            type="button"
+            class="page-control page-number"
+            (click)="goToPage(totalPages)"
+            [class.current]="currentPage === totalPages"
+          >
+            {{ totalPages }}
+          </button>
+        </ng-container>
+
+        <!-- Prikaz u sredini -->
+        <ng-container
+          *ngIf="currentPage > 2 && currentPage < totalPages - 1"
+        >
+          <button
+            type="button"
+            class="page-control page-number"
+            (click)="goToPage(1)"
+          >
+            1
+          </button>
+
+          <span class="pagination-dots">...</span>
+
+          <button
+            *ngFor="let page of visiblePageNumbers"
+            type="button"
+            class="page-control page-number"
+            [class.current]="page === currentPage"
+            [attr.aria-current]="page === currentPage ? 'page' : null"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <span class="pagination-dots">...</span>
+
+          <button
+            type="button"
+            class="page-control page-number"
+            (click)="goToPage(totalPages)"
+          >
+            {{ totalPages }}
+          </button>
+        </ng-container>
+
+        <!-- Prikaz na kraju -->
+        <ng-container *ngIf="currentPage >= totalPages - 1">
+          <button
+            type="button"
+            class="page-control page-number"
+            (click)="goToPage(1)"
+          >
+            1
+          </button>
+
+          <span class="pagination-dots">...</span>
+
+          <button
+            *ngFor="let page of visiblePageNumbers"
+            type="button"
+            class="page-control page-number"
+            [class.current]="page === currentPage"
+            [attr.aria-current]="page === currentPage ? 'page' : null"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        </ng-container>
+
+      </ng-container>
+
+      <!-- Sledeća stranica -->
+      <button
+        type="button"
+        class="page-control"
+        aria-label="Sledeća stranica"
+        [disabled]="currentPage === totalPages"
+        (click)="goToPage(currentPage + 1)"
+      >
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+    </div>
+
+
+    </nav>
+
+  </main>
+
+</div>
+

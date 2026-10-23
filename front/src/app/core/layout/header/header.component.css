@@ -1,0 +1,259 @@
+
+:host {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.site-header {
+  background: #07111f;
+  color: #fff;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.header-inner {
+  width: min(1440px, calc(100% - 48px));
+  min-height: 88px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.brand-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    font-size: 21px;
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  small {
+    color: #91a4bd;
+    font-size: 9px;
+    letter-spacing: 1.4px;
+  }
+}
+
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  a {
+    color: #a9b8ca;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 12px 10px;
+    border-radius: 9px;
+    transition: 0.2s ease;
+
+    &:hover,
+    &.active {
+      color: #fff;
+      background: rgba(34, 130, 255, 0.14);
+    }
+
+    &.active {
+      box-shadow: inset 0 -2px #268cff;
+    }
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-panel-link {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid #29415f;
+  border-radius: 9px;
+  background: #10243b;
+  color: #dce8f7;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.admin-panel-link:hover {
+  border-color: #3b82c4;
+  background: #14365a;
+  color: #ffffff;
+}
+
+.mobile-admin-link {
+  display: none;
+}
+
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #26374c;
+  border-radius: 10px;
+  background: #101f31;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.mobile-nav {
+  display: none;
+}
+
+@media (max-width: 1120px) {
+  .header-inner {
+    width: min(100% - 32px, 1440px);
+  }
+
+  .desktop-nav {
+    gap: 0;
+
+    a {
+      padding: 10px 7px;
+      font-size: 12px;
+    }
+  }
+
+  .brand-text strong {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  .header-inner {
+    min-height: 76px;
+  }
+
+  .desktop-nav {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .desktop-admin-link {
+    display: none;
+  }
+
+  .mobile-nav {
+    display: none;
+    padding: 10px 16px 18px;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+
+    &.open {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    a {
+      padding: 13px 14px;
+      color: #b9c7d8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      background: #0d1a2b;
+      border: 1px solid #1b2c42;
+      border-radius: 10px;
+
+      &.active {
+        color: #fff;
+        background: #123967;
+        border-color: #267de0;
+      }
+    }
+
+    .mobile-admin-link {
+      grid-column: 1 / -1;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-top: 4px;
+      border-color: #31547b;
+      background: #15395f;
+      color: #ffffff;
+      font-weight: 750;
+    }
+
+    .mobile-admin-link:hover {
+      border-color: #4388d0;
+      background: #194977;
+    }
+
+    .mobile-admin-arrow {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .header-inner {
+    width: calc(100% - 28px);
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .brand-text strong {
+    font-size: 17px;
+  }
+
+  .brand-text small {
+    font-size: 8px;
+  }
+
+  .header-actions {
+    gap: 10px;
+  }
+}

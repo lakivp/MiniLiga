@@ -1,0 +1,1172 @@
+<div class="admin-teams-page">
+
+  <!-- =====================================================
+       PAGE HEADER
+  ====================================================== -->
+
+  <header class="page-header">
+
+    <div class="header-content">
+
+      <div class="breadcrumb">
+        <span>ADMINISTRACIJA</span>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>TIMOVI</span>
+      </div>
+
+      <div class="title-row">
+
+        <div class="title-icon">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+
+        <div class="title-copy">
+          <h1>Timovi</h1>
+          <p>Upravljanje ekipama i njihovim podacima</p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="add-team-button"
+      (click)="openCreate()"
+    >
+      <i class="fa-solid fa-plus"></i>
+      <span>Dodaj tim</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       ALERTS
+  ====================================================== -->
+
+  <div
+    *ngIf="success"
+    class="alert alert-success"
+    role="status"
+  >
+
+    <div class="alert-icon">
+      <i class="fa-solid fa-circle-check"></i>
+    </div>
+
+    <div class="alert-content">
+      <strong>Uspešno</strong>
+      <span>{{ success }}</span>
+    </div>
+
+    <button
+      type="button"
+      (click)="success = ''"
+      aria-label="Zatvori poruku"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+  </div>
+
+
+  <div
+    *ngIf="error"
+    class="alert alert-error"
+    role="alert"
+  >
+
+    <div class="alert-icon">
+      <i class="fa-solid fa-circle-exclamation"></i>
+    </div>
+
+    <div class="alert-content">
+      <strong>Greška</strong>
+      <span>{{ error }}</span>
+    </div>
+
+    <button
+      type="button"
+      (click)="error = ''"
+      aria-label="Zatvori poruku"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       CREATE / EDIT FORM
+  ====================================================== -->
+
+  <section
+    *ngIf="showForm"
+    id="team-form"
+    class="team-form"
+  >
+
+    <!-- FORM HEADER -->
+
+    <div class="form-heading">
+
+      <div class="form-heading-left">
+
+        <div class="form-icon">
+          <i
+            class="fa-solid"
+            [class.fa-plus]="editingId === null"
+            [class.fa-pen]="editingId !== null"
+          ></i>
+        </div>
+
+        <div>
+          <span class="form-eyebrow">
+            UPRAVLJANJE TIMOM
+          </span>
+
+          <h2>
+            {{
+              editingId === null
+                ? 'Dodavanje novog tima'
+                : 'Izmena tima'
+            }}
+          </h2>
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        class="close-form"
+        (click)="cancelForm()"
+        aria-label="Zatvori formu"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+
+    <!-- FORM BODY -->
+
+    <div class="form-body">
+
+      <div class="form-grid">
+
+        <!-- =================================================
+             TEAM NAME
+        ================================================== -->
+
+        <div class="form-field">
+
+          <label>
+            Naziv tima
+            <span>*</span>
+          </label>
+
+          <div class="input-wrapper">
+
+            <div class="input-icon">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+
+            <input
+              type="text"
+              [(ngModel)]="form.name"
+              placeholder="npr. FK Intertoto"
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SHORT NAME
+        ================================================== -->
+
+        <div class="form-field">
+
+          <label>
+            Skraćeni naziv
+          </label>
+
+          <div class="input-wrapper">
+
+            <div class="input-icon">
+              <i class="fa-solid fa-font"></i>
+            </div>
+
+            <input
+              type="text"
+              [(ngModel)]="form.shortName"
+              placeholder="npr. INT"
+              maxlength="10"
+            >
+
+          </div>
+
+          <small>
+            Kratka oznaka koja će se koristiti na tabelama i rezultatima.
+          </small>
+
+        </div>
+
+
+        <!-- =================================================
+             TEAM LOGO
+        ================================================== -->
+
+        <div class="form-field full">
+
+          <div class="field-heading">
+
+            <div>
+              <label>Grb tima</label>
+
+              <span class="field-description">
+                Dodajte logo ekipe koji će se prikazivati kroz aplikaciju.
+              </span>
+            </div>
+
+            <span class="field-badge">
+              <i class="fa-solid fa-image"></i>
+              LOGO
+            </span>
+
+          </div>
+
+
+          <div class="logo-upload-card">
+
+            <!-- PREVIEW -->
+
+            <div class="logo-upload-preview">
+
+              <div class="logo-preview-inner">
+
+                <img
+                  *ngIf="logoPreviewUrl"
+                  [src]="logoPreviewUrl"
+                  [alt]="form.name || 'Grb tima'"
+                >
+
+                <div
+                  *ngIf="!logoPreviewUrl"
+                  class="logo-placeholder"
+                >
+                  <i class="fa-solid fa-shield-halved"></i>
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- CONTENT -->
+
+            <div class="logo-upload-content">
+
+              <div class="logo-upload-main">
+
+                <div class="logo-upload-title">
+
+                  <strong>
+                    {{
+                      logoPreviewUrl
+                        ? 'Grb je spreman'
+                        : 'Dodajte grb ekipe'
+                    }}
+                  </strong>
+
+                  <span>
+                    {{
+                      logoFile?.name
+                        || (
+                          logoPreviewUrl
+                            ? 'Trenutno izabrani grb'
+                            : 'Izaberite sliku sa računara'
+                        )
+                    }}
+                  </span>
+
+                </div>
+
+
+                <div class="logo-upload-status">
+
+                  <span
+                    class="upload-status-dot"
+                    [class.active]="!!logoPreviewUrl"
+                  ></span>
+
+                  <span>
+                    {{
+                      logoPreviewUrl
+                        ? 'Slika je izabrana'
+                        : 'Nema izabrane slike'
+                    }}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <!-- ACTIONS -->
+
+              <div class="logo-upload-actions">
+
+                <label class="logo-upload-button">
+
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                  <span>
+                    {{
+                      logoPreviewUrl
+                        ? 'Promeni grb'
+                        : 'Izaberi grb'
+                    }}
+                  </span>
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    [disabled]="saving"
+                    (change)="onLogoFileSelected($event)"
+                  >
+
+                </label>
+
+
+                <button
+                  type="button"
+                  class="logo-remove-button"
+                  *ngIf="logoPreviewUrl"
+                  [disabled]="saving"
+                  (click)="removeLogo()"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                  <span>Ukloni</span>
+                </button>
+
+              </div>
+
+
+              <!-- HINT -->
+
+              <div class="logo-upload-hint">
+
+                <i class="fa-solid fa-circle-info"></i>
+
+                <span>
+                  JPG, PNG, WEBP ili GIF · maksimalno 5 MB
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DESCRIPTION
+        ================================================== -->
+
+        <div class="form-field full">
+
+          <label>
+            Opis ekipe
+          </label>
+
+          <div class="textarea-wrapper">
+
+            <textarea
+              [(ngModel)]="form.description"
+              rows="4"
+              placeholder="Napišite kratak opis ekipe..."
+            ></textarea>
+
+            <div class="textarea-icon">
+              <i class="fa-solid fa-align-left"></i>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             ACTIVE
+        ================================================== -->
+
+        <div class="active-setting">
+
+          <div class="active-setting-left">
+
+            <div class="active-icon">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div class="active-text">
+
+              <strong>
+                Aktivan tim
+              </strong>
+
+              <span>
+                Tim može učestvovati u novim takmičenjima i biti prikazan u sistemu.
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <label class="switch">
+
+            <input
+              type="checkbox"
+              [(ngModel)]="form.isActive"
+            >
+
+            <span class="slider"></span>
+
+          </label>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- FORM FOOTER -->
+
+    <div class="form-footer">
+
+      <button
+        type="button"
+        class="secondary-button"
+        [disabled]="saving"
+        (click)="cancelForm()"
+      >
+        <i class="fa-solid fa-xmark"></i>
+        <span>Otkaži</span>
+      </button>
+
+
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="saving"
+        (click)="save()"
+      >
+
+        <span
+          class="button-spinner"
+          *ngIf="saving"
+        ></span>
+
+        <i
+          class="fa-solid"
+          [class.fa-plus]="editingId === null && !saving"
+          [class.fa-check]="editingId !== null && !saving"
+          *ngIf="!saving"
+        ></i>
+
+        <span>
+          {{
+            editingId === null
+              ? 'Dodaj tim'
+              : 'Sačuvaj izmene'
+          }}
+        </span>
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       TEAMS SECTION
+  ====================================================== -->
+
+  <section class="teams-section">
+
+    <!-- SECTION HEADER -->
+
+    <div class="section-heading">
+
+      <div class="section-heading-left">
+
+        <div class="section-icon">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+
+        <div>
+
+          <div class="section-title-row">
+
+            <h2>
+              Registrovani timovi
+            </h2>
+
+            <span class="team-count">
+              {{ filteredTeams.length }}
+            </span>
+
+          </div>
+
+          <p>
+            Sve ekipe registrovane u sistemu.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+        
+    <!-- PRETRAGA TIMOVA -->
+    <div
+      class="team-search"
+      *ngIf="!loading && teams.length > 0"
+    >
+      <div class="team-search-input">
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Pretraži timove po imenu..."
+          aria-label="Pretraži timove po imenu"
+        >
+
+        <button
+          *ngIf="searchTerm"
+          type="button"
+          class="team-search-clear"
+          (click)="searchTerm = ''; onSearchChange()"
+          aria-label="Obriši pretragu"
+          title="Obriši pretragu"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+
+
+    <!-- =================================================
+         LOADING
+    ================================================== -->
+
+    <div
+      *ngIf="loading"
+      class="state-box"
+    >
+
+      <div class="loader"></div>
+
+      <strong>
+        Učitavanje timova
+      </strong>
+
+      <span>
+        Molimo sačekajte...
+      </span>
+
+    </div>
+
+
+    <!-- =================================================
+         EMPTY
+    ================================================== -->
+
+    <div
+      *ngIf="
+        !loading &&
+        teams.length === 0
+      "
+      class="state-box empty-state"
+    >
+
+      <div class="empty-icon">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+
+      <h3>
+        Nema registrovanih timova
+      </h3>
+
+      <p>
+        Dodajte prvi tim kako biste započeli upravljanje ekipama.
+      </p>
+
+      <button
+        type="button"
+        (click)="openCreate()"
+      >
+        <i class="fa-solid fa-plus"></i>
+        <span>Dodaj prvi tim</span>
+      </button>
+
+    </div>
+
+    
+    <!-- NEMA REZULTATA PRETRAGE -->
+    <div
+      *ngIf="
+        !loading &&
+        teams.length > 0 &&
+        filteredTeams.length === 0
+      "
+      class="state-box empty-state search-empty-state"
+    >
+      <div class="empty-icon">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+
+      <h3>Nema pronađenih timova</h3>
+
+      <p>
+        Nijedan tim ne odgovara pretrazi
+        „{{ searchTerm }}“.
+      </p>
+
+      <button
+        type="button"
+        (click)="searchTerm = ''; onSearchChange()"
+      >
+        <i class="fa-solid fa-rotate-left"></i>
+        <span>Prikaži sve timove</span>
+      </button>
+    </div>
+
+
+    <!-- =================================================
+         TEAM GRID
+    ================================================== -->
+
+    <div
+      *ngIf="
+        !loading &&
+        filteredTeams.length > 0
+      "
+      class="teams-grid"
+      [class.paginated]="filteredTeams.length > pageSize"
+    >
+
+      <article
+        *ngFor="let team of paginatedTeams"
+        class="team-card"
+      >
+
+        <!-- CARD HEADER -->
+
+        <div class="card-top">
+
+          <span
+            class="team-status"
+            [class.inactive]="!team.isActive"
+          >
+
+            <span class="status-dot"></span>
+
+            {{ team.isActive ? 'AKTIVAN' : 'NEAKTIVAN' }}
+
+          </span>
+
+
+          <button
+            type="button"
+            class="more-button"
+            (click)="openEdit(team)"
+            title="Izmeni tim"
+            aria-label="Izmeni tim"
+          >
+            <i class="fa-solid fa-ellipsis"></i>
+          </button>
+
+        </div>
+
+
+        <!-- TEAM LOGO -->
+
+        <div
+          class="team-logo"
+          [style.--team-color]="
+            team.primaryColor || '#2563eb'
+          "
+        >
+
+          <div class="logo-glow"></div>
+
+          <div class="team-logo-inner">
+
+            <img
+              *ngIf="team.logoUrl"
+              [src]="team.logoUrl"
+              [alt]="team.name"
+            >
+
+            <span
+              *ngIf="!team.logoUrl"
+              class="logo-placeholder"
+            >
+              {{
+                team.shortName
+                  || team.name.charAt(0)
+              }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- TEAM INFO -->
+
+        <div class="team-info">
+
+          <h3>
+            {{ team.name }}
+          </h3>
+
+          <span
+            *ngIf="team.shortName"
+            class="team-short-name"
+          >
+            {{ team.shortName }}
+          </span>
+
+          <p>
+            {{
+              team.description
+                || 'Bez opisa ekipe.'
+            }}
+          </p>
+
+        </div>
+
+
+        <!-- TEAM META -->
+
+        <div class="team-meta">
+
+          <div class="meta-item">
+
+            <div class="meta-icon">
+              <i class="fa-solid fa-users"></i>
+            </div>
+
+            <div class="meta-content">
+
+              <strong>
+                {{ team.playerCount ?? 0 }}
+              </strong>
+
+              <span>
+                igrača
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="meta-divider"></div>
+
+
+          <div class="meta-item">
+
+            <div class="meta-icon">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div class="meta-content">
+
+              <strong>
+                {{ team.isActive ? 'DA' : 'NE' }}
+              </strong>
+
+              <span>
+                aktivan
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- CARD ACTIONS -->
+
+        <div class="card-actions">
+
+          <a
+            class="players-action"
+            [routerLink]="[
+              '/admin/timovi',
+              team.id,
+              'igraci'
+            ]"
+          >
+
+            <i class="fa-solid fa-users"></i>
+
+            <span>
+              Igrači
+            </span>
+
+            <i class="fa-solid fa-arrow-right arrow"></i>
+
+          </a>
+
+
+          <button
+            type="button"
+            class="edit-action"
+            (click)="openEdit(team)"
+            title="Izmeni"
+            aria-label="Izmeni tim"
+          >
+            <i class="fa-solid fa-pen"></i>
+          </button>
+
+
+          <button
+            type="button"
+            class="delete-action"
+            (click)="deleteTeam(team)"
+            title="Obriši"
+            aria-label="Obriši tim"
+          >
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+
+        </div>
+
+      </article>
+
+    </div>
+
+
+    <!-- =================================================
+         PAGINATION
+    ================================================== -->
+
+    <nav
+      *ngIf="
+        !loading &&
+        filteredTeams.length > pageSize
+      "
+      class="pagination"
+      aria-label="Stranice timova"
+    >
+
+      <p class="pagination-summary">
+
+        Prikaz
+
+        <strong>
+          {{ firstVisibleTeam }}–{{ lastVisibleTeam }}
+        </strong>
+
+        od
+
+        <strong>
+            {{ filteredTeams.length }}        
+        </strong>
+
+        timova
+
+      </p>
+
+
+
+      <div class="pagination-controls">
+
+        <!-- PRETHODNA STRANICA -->
+        <button
+          type="button"
+          class="page-control"
+          aria-label="Prethodna stranica"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <!-- DO TRI STRANICE -->
+        <ng-container *ngIf="totalPages <= 3">
+
+          <button
+            *ngFor="let page of visiblePageNumbers"
+            type="button"
+            class="page-control page-number"
+            [class.current]="page === currentPage"
+            [attr.aria-current]="page === currentPage ? 'page' : null"
+            [attr.aria-label]="'Stranica ' + page"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+        </ng-container>
+
+        <!-- POČETAK: 1 2 3 ... POSLEDNJA -->
+        <ng-container *ngIf="totalPages > 3 && currentPage <= 2">
+
+          <button
+            *ngFor="let page of visiblePageNumbers"
+            type="button"
+            class="page-control page-number"
+            [class.current]="page === currentPage"
+            [attr.aria-current]="page === currentPage ? 'page' : null"
+            [attr.aria-label]="'Stranica ' + page"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <span class="pagination-dots" aria-hidden="true">...</span>
+
+          <button
+            type="button"
+            class="page-control page-number"
+            [attr.aria-label]="'Stranica ' + totalPages"
+            (click)="goToPage(totalPages)"
+          >
+            {{ totalPages }}
+          </button>
+
+        </ng-container>
+
+        <!-- SREDINA: PRVA ... TRI BROJA ... POSLEDNJA -->
+        <ng-container
+          *ngIf="
+            totalPages > 3 &&
+            currentPage > 2 &&
+            currentPage < totalPages - 1
+          "
+        >
+
+          <button
+            type="button"
+            class="page-control page-number"
+            aria-label="Prva stranica"
+            (click)="goToPage(1)"
+          >
+            1
+          </button>
+
+          <span class="pagination-dots" aria-hidden="true">...</span>
+
+          <button
+            *ngFor="let page of visiblePageNumbers"
+            type="button"
+            class="page-control page-number"
+            [class.current]="page === currentPage"
+            [attr.aria-current]="page === currentPage ? 'page' : null"
+            [attr.aria-label]="'Stranica ' + page"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <span class="pagination-dots" aria-hidden="true">...</span>
+
+          <button
+            type="button"
+            class="page-control page-number"
+            [attr.aria-label]="'Stranica ' + totalPages"
+            (click)="goToPage(totalPages)"
+          >
+            {{ totalPages }}
+          </button>
+
+        </ng-container>
+
+        <!-- KRAJ: PRVA ... POSLEDNJE TRI STRANICE -->
+        <ng-container *ngIf="totalPages > 3 && currentPage >= totalPages - 1">
+
+          <button
+            type="button"
+            class="page-control page-number"
+            aria-label="Prva stranica"
+            (click)="goToPage(1)"
+          >
+            1
+          </button>
+
+          <span class="pagination-dots" aria-hidden="true">...</span>
+
+          <button
+            *ngFor="let page of visiblePageNumbers"
+            type="button"
+            class="page-control page-number"
+            [class.current]="page === currentPage"
+            [attr.aria-current]="page === currentPage ? 'page' : null"
+            [attr.aria-label]="'Stranica ' + page"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+        </ng-container>
+
+        <!-- SLEDEĆA STRANICA -->
+        <button
+          type="button"
+          class="page-control"
+          aria-label="Sledeća stranica"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+        >
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+      </div>
+
+
+    </nav>
+
+  </section>
+
+
+  <!-- =====================================================
+       DELETE CONFIRMATION MODAL
+  ====================================================== -->
+
+  <div
+    *ngIf="showDeleteModal"
+    class="delete-modal-overlay"
+    (click)="closeDeleteModal()"
+  >
+
+    <div
+      class="delete-modal"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-modal-title"
+    >
+
+      <!-- CLOSE -->
+
+      <button
+        type="button"
+        class="delete-modal-close"
+        [disabled]="deleting"
+        (click)="closeDeleteModal()"
+        aria-label="Zatvori prozor"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+
+      <!-- ICON -->
+
+      <div class="delete-modal-icon">
+        <i class="fa-solid fa-trash-can"></i>
+      </div>
+
+
+      <!-- CONTENT -->
+
+      <div class="delete-modal-content">
+
+        <span class="delete-modal-eyebrow">
+          POTVRDA BRISANJA
+        </span>
+
+        <h2 id="delete-modal-title">
+          Da li ste sigurni?
+        </h2>
+
+        <p>
+          Da li zaista želite da obrišete tim
+          <strong>
+            {{ teamToDelete?.name }}
+          </strong>?
+        </p>
+
+
+        <div class="delete-warning">
+
+          <div class="delete-warning-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+
+          <div>
+            <strong>
+              Pažnja
+            </strong>
+
+            <span>
+              Ova radnja može imati posledice po povezane podatke
+              i ne može se jednostavno poništiti.
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="delete-modal-actions">
+
+        <button
+          type="button"
+          class="delete-cancel-button"
+          [disabled]="deleting"
+          (click)="closeDeleteModal()"
+        >
+          Otkaži
+        </button>
+
+
+        <button
+          type="button"
+          class="delete-confirm-button"
+          [disabled]="deleting"
+          (click)="confirmDeleteTeam()"
+        >
+
+          <span
+            class="delete-spinner"
+            *ngIf="deleting"
+          ></span>
+
+          <i
+            class="fa-solid fa-trash-can"
+            *ngIf="!deleting"
+          ></i>
+
+          <span>
+            {{ deleting ? 'Brisanje...' : 'Obriši tim' }}
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

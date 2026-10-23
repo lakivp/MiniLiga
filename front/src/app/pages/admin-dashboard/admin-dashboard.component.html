@@ -1,0 +1,210 @@
+<section class="dashboard">
+
+  <!-- HERO -->
+  <header class="dashboard-hero">
+    <div class="hero-background-circle circle-one"></div>
+    <div class="hero-background-circle circle-two"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="status-dot"></span>
+        ADMINISTRATORSKI PANEL
+      </div>
+
+      <h1>
+        Dobrodošli u<br>
+        <span>Admin panel.</span>
+      </h1>
+
+      <p>
+        Sve što ti je potrebno za upravljanje ligom, utakmicama,
+        ekipama, takmičenjima i vestima nalazi se na jednom mestu.
+      </p>
+
+      <a routerLink="/admin/utakmice" class="hero-button">
+        <i class="fa-solid fa-futbol"></i>
+        Upravljaj utakmicama
+        <i class="fa-solid fa-arrow-right button-arrow"></i>
+      </a>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-ring ring-one"></div>
+      <div class="hero-ring ring-two"></div>
+
+      <div class="hero-ball">
+        <i class="fa-solid fa-futbol"></i>
+      </div>
+
+      <div class="floating-card floating-card-top">
+        <span class="floating-icon">
+          <i class="fa-solid fa-trophy"></i>
+        </span>
+        <span>
+          <strong>Takmičenja</strong>
+          <small>Organizacija lige</small>
+        </span>
+      </div>
+
+      <div class="floating-card floating-card-bottom">
+        <span class="floating-icon">
+          <i class="fa-solid fa-shield-halved"></i>
+        </span>
+        <span>
+          <strong>Timovi i igrači</strong>
+          <small>Upravljanje ekipama</small>
+        </span>
+      </div>
+    </div>
+
+    <div class="hero-footer">
+      <span>INTERTOTO LIGA</span>
+      <span class="hero-footer-line"></span>
+      <span>ADMINISTRACIJA NA JEDNOM MESTU</span>
+    </div>
+  </header>
+
+
+  <!-- NASLOV SEKCIJE -->
+  <section class="section-heading">
+    <div>
+      <span class="section-kicker">CENTAR ZA UPRAVLJANJE</span>
+      <h2>Administracija</h2>
+      <p>Izaberi oblast koju želiš da uređuješ.</p>
+    </div>
+
+    <div class="section-indicator">
+      <i class="fa-solid fa-layer-group"></i>
+      <span>4 modula</span>
+    </div>
+  </section>
+
+
+  <!-- GLAVNI MODULI -->
+  <section class="dashboard-grid">
+
+    <!-- UTAKMICE -->
+    <a
+      routerLink="/admin/utakmice"
+      class="dashboard-card matches-card"
+    >
+      <div class="card-top">
+        <div class="card-icon">
+          <i class="fa-solid fa-futbol"></i>
+        </div>
+
+        <span class="card-number">01</span>
+      </div>
+
+      <div class="card-content">
+        <span class="card-kicker">RASPORED I REZULTATI</span>
+        <h3>Utakmice</h3>
+        <p>
+          Kreiraj utakmice, uređuj termine i upravljaj
+          rezultatima i tokom odigravanja.
+        </p>
+      </div>
+
+      <div class="card-footer">
+        <span>Otvori utakmice</span>
+        <span class="card-arrow">
+          <i class="fa-solid fa-arrow-right"></i>
+        </span>
+      </div>
+    </a>
+
+
+    <!-- TIMOVI -->
+    <a
+      routerLink="/admin/timovi"
+      class="dashboard-card teams-card"
+    >
+      <div class="card-top">
+        <div class="card-icon">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+
+        <span class="card-number">02</span>
+      </div>
+
+      <div class="card-content">
+        <span class="card-kicker">EKIPE I SASTAVI</span>
+        <h3>Timovi</h3>
+        <p>
+          Organizuj ekipe i održavaj podatke o timovima
+          i njihovim igračima.
+        </p>
+      </div>
+
+      <div class="card-footer">
+        <span>Otvori timove</span>
+        <span class="card-arrow">
+          <i class="fa-solid fa-arrow-right"></i>
+        </span>
+      </div>
+    </a>
+
+
+    <!-- TAKMIČENJA -->
+    <a
+      routerLink="/admin/takmicenja"
+      class="dashboard-card competitions-card"
+    >
+      <div class="card-top">
+        <div class="card-icon">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+
+        <span class="card-number">03</span>
+      </div>
+
+      <div class="card-content">
+        <span class="card-kicker">SEZONE I FAZE</span>
+        <h3>Takmičenja</h3>
+        <p>
+          Upravljaj sezonama, fazama takmičenja
+          i organizacijom lige.
+        </p>
+      </div>
+
+      <div class="card-footer">
+        <span>Otvori takmičenja</span>
+        <span class="card-arrow">
+          <i class="fa-solid fa-arrow-right"></i>
+        </span>
+      </div>
+    </a>
+
+
+    <!-- VESTI -->
+    <a
+      routerLink="/admin/news"
+      class="dashboard-card news-card"
+    >
+      <div class="card-top">
+        <div class="card-icon">
+          <i class="fa-regular fa-newspaper"></i>
+        </div>
+
+        <span class="card-number">04</span>
+      </div>
+
+      <div class="card-content">
+        <span class="card-kicker">INFORMISANJE</span>
+        <h3>Vesti</h3>
+        <p>
+          Objavljuj novosti, uređuj postojeće članke
+          i informiši pratioce lige.
+        </p>
+      </div>
+
+      <div class="card-footer">
+        <span>Otvori vesti</span>
+        <span class="card-arrow">
+          <i class="fa-solid fa-arrow-right"></i>
+        </span>
+      </div>
+    </a>
+
+  </section>
+</section>

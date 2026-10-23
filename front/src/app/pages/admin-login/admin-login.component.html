@@ -1,0 +1,154 @@
+<div class="admin-login-page">
+
+  <div class="login-background"></div>
+
+  <div class="login-wrapper">
+
+    <div class="login-card">
+
+      <div class="login-logo">
+
+        <div class="logo-mark">
+            <img
+              src="assets/logo.png"
+              alt="INTERTOTO logo"
+            />
+        </div>
+
+        <div class="logo-text">
+          <strong>INTERTOTO</strong>
+          <span>ADMIN PANEL</span>
+        </div>
+
+      </div>
+
+      <div class="login-header">
+
+        <h1>
+          Dobrodošli nazad
+        </h1>
+
+        <p>
+          Prijavite se na administratorski panel.
+        </p>
+
+      </div>
+
+      <form
+        (ngSubmit)="login()"
+        #loginForm="ngForm"
+      >
+
+        <div class="form-group">
+
+          <label for="email">
+            Email
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fa-solid fa-envelope"></i>
+
+            <input
+              id="email"
+              type="email"
+              name="email"
+              [(ngModel)]="email"
+              placeholder="admin@intertoto.rs"
+              autocomplete="username"
+              [disabled]="loading"
+            />
+
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="password">
+            Lozinka
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fa-solid fa-lock"></i>
+
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              name="password"
+              [(ngModel)]="password"
+              placeholder="Unesite lozinku"
+              autocomplete="current-password"
+              [disabled]="loading"
+            />
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="togglePassword()"
+              [disabled]="loading"
+            >
+
+              <i
+                class="fa-solid"
+                [class.fa-eye]="!showPassword"
+                [class.fa-eye-slash]="showPassword"
+              ></i>
+
+            </button>
+
+          </div>
+
+        </div>
+
+        <div
+          class="login-error"
+          *ngIf="errorMessage"
+        >
+
+          <i class="fa-solid fa-circle-exclamation"></i>
+
+          <span>
+            {{ errorMessage }}
+          </span>
+
+        </div>
+
+        <button
+          type="submit"
+          class="login-button"
+          [disabled]="loading"
+        >
+
+          <i
+            *ngIf="loading"
+            class="fa-solid fa-spinner fa-spin"
+          ></i>
+
+          <i
+            *ngIf="!loading"
+            class="fa-solid fa-right-to-bracket"
+          ></i>
+
+          <span>
+            {{ loading ? 'Prijavljivanje...' : 'Prijavi se' }}
+          </span>
+
+        </button>
+
+        <a
+          class="back-site-link"
+          routerLink="/"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+          Nazad na sajt
+        </a>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>

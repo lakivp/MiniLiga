@@ -1,0 +1,589 @@
+<div class="admin-news-page">
+
+  <!-- ========================================= -->
+  <!-- HEADER -->
+  <!-- ========================================= -->
+
+  <div class="page-header">
+
+    <div class="header-content">
+
+      <div>
+        <span class="page-label">
+          ADMINISTRACIJA
+        </span>
+
+        <h1>
+          Vesti
+        </h1>
+
+        <p>
+          Upravljanje vestima i objavama Intertoto lige.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="add-news-btn"
+        (click)="openAddForm()"
+        *ngIf="!isFormVisible"
+      >
+        <i class="fa-solid fa-plus"></i>
+        <span>Dodaj vest</span>
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- PORUKE -->
+  <!-- ========================================= -->
+
+  <div
+    class="message success-message"
+    *ngIf="successMessage"
+  >
+    <i class="fa-solid fa-circle-check"></i>
+
+    <span>
+      {{ successMessage }}
+    </span>
+  </div>
+
+
+  <div
+    class="message error-message"
+    *ngIf="errorMessage"
+  >
+    <i class="fa-solid fa-circle-exclamation"></i>
+
+    <span>
+      {{ errorMessage }}
+    </span>
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- FORMA -->
+  <!-- ========================================= -->
+
+  <section
+    class="news-form-section"
+    *ngIf="isFormVisible"
+  >
+
+    <div class="form-header">
+
+      <div>
+
+        <span class="form-label">
+          {{ isEditMode ? 'IZMENA VESTI' : 'NOVA OBJAVA' }}
+        </span>
+
+        <h2>
+          {{ isEditMode ? 'Izmeni vest' : 'Dodaj novu vest' }}
+        </h2>
+
+      </div>
+
+      <button
+        type="button"
+        class="close-form-btn"
+        (click)="closeForm()"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+
+    <div class="form-body">
+
+      <!-- NASLOV -->
+
+      <div class="form-group">
+
+        <label for="news-title">
+          Naslov vesti
+        </label>
+
+        <input
+          id="news-title"
+          type="text"
+          [(ngModel)]="title"
+          placeholder="Unesite naslov vesti..."
+          maxlength="200"
+          [disabled]="saving"
+        />
+
+      </div>
+
+
+      <!-- SLIKA -->
+
+      <div class="form-group">
+
+        <label>
+          Slika
+        </label>
+
+        <div class="image-upload-wrapper">
+
+          <label
+            for="news-image"
+            class="image-upload"
+          >
+
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+
+            <strong>
+              Izaberite sliku
+            </strong>
+
+            <span>
+              JPG, PNG ili WEBP · maksimalno 5 MB
+            </span>
+
+          </label>
+
+          <input
+            id="news-image"
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+            (change)="onImageSelected($event)"
+            [disabled]="saving"
+          />
+
+        </div>
+
+      </div>
+
+
+      <!-- IMAGE PREVIEW -->
+
+      <div
+        class="image-preview-wrapper"
+        *ngIf="imagePreview"
+      >
+
+        <div class="preview-header">
+
+          <span>
+            Pregled slike
+          </span>
+
+          <span
+            class="preview-file"
+            *ngIf="selectedImage"
+          >
+            {{ selectedImage.name }}
+          </span>
+
+        </div>
+
+        <div class="image-preview">
+
+          <img
+            [src]="imagePreview"
+            alt="Pregled slike vesti"
+          />
+
+        </div>
+
+      </div>
+
+
+      <!-- TEKST -->
+
+      <div class="form-group">
+
+        <label for="news-content">
+          Tekst vesti
+        </label>
+
+        <textarea
+          id="news-content"
+          [(ngModel)]="content"
+          placeholder="Unesite kompletan tekst vesti..."
+          rows="12"
+          [disabled]="saving"
+        ></textarea>
+
+        <div class="character-info">
+          {{ content.length }} karaktera
+        </div>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="cancel-btn"
+          (click)="closeForm()"
+          [disabled]="saving"
+        >
+          Otkaži
+        </button>
+
+        <button
+          type="button"
+          class="save-btn"
+          (click)="saveNews()"
+          [disabled]="saving"
+        >
+
+          <i
+            class="fa-solid"
+            [class.fa-spinner]="saving"
+            [class.fa-spin]="saving"
+            [class.fa-check]="!saving"
+          ></i>
+
+          <span>
+            {{
+              saving
+                ? 'Čuvanje...'
+                : (isEditMode ? 'Sačuvaj izmene' : 'Objavi vest')
+            }}
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================================= -->
+  <!-- LOADING -->
+  <!-- ========================================= -->
+
+  <div
+    class="loading-container"
+    *ngIf="loading"
+  >
+
+    <div class="loading-spinner">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+    </div>
+
+    <p>
+      Učitavanje vesti...
+    </p>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- PRAZNO -->
+  <!-- ========================================= -->
+
+  <div
+    class="empty-state"
+    *ngIf="!loading && news.length === 0 && !isFormVisible"
+  >
+
+    <div class="empty-icon">
+      <i class="fa-regular fa-newspaper"></i>
+    </div>
+
+    <h2>
+      Nema objavljenih vesti
+    </h2>
+
+    <p>
+      Trenutno nema nijedne vesti.
+      Dodajte prvu vest i ona će se pojaviti ovde.
+    </p>
+
+    <button
+      type="button"
+      class="add-news-btn empty-add-btn"
+      (click)="openAddForm()"
+    >
+      <i class="fa-solid fa-plus"></i>
+      Dodaj prvu vest
+    </button>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- NEWS GRID -->
+  <!-- ========================================= -->
+
+  <section
+    class="news-section"
+    *ngIf="!loading && news.length > 0"
+  >
+
+    <div class="section-heading">
+
+      <div>
+
+        <h2>
+          Sve vesti
+        </h2>
+
+      </div>
+
+      <div class="news-count">
+        {{ news.length }}
+        {{ news.length === 1 ? 'vest' : 'vesti' }}
+      </div>
+
+    </div>
+
+
+    <div class="news-grid">
+
+      <article
+        class="news-card"
+        *ngFor="let item of paginatedNews"
+      >
+
+        <!-- IMAGE -->
+
+        <div class="news-card-image">
+
+          <img
+            *ngIf="item.imageUrl"
+            [src]="getImageUrl(item.imageUrl)"
+            [alt]="item.title"
+          />
+
+          <div
+            class="no-image"
+            *ngIf="!item.imageUrl"
+          >
+
+            <i class="fa-regular fa-image"></i>
+
+            <span>
+              Bez slike
+            </span>
+
+          </div>
+
+          <div class="news-date">
+
+            <i class="fa-regular fa-calendar"></i>
+
+            {{ formatDate(item.createdAt) }}
+
+          </div>
+
+        </div>
+
+
+        <!-- CONTENT -->
+
+        <div class="news-card-content">
+
+          <h3>
+            {{ item.title }}
+          </h3>
+
+          <p>
+            {{ getShortContent(item.content) }}
+          </p>
+
+
+          <div class="card-footer">
+
+            <span class="card-id">
+              #{{ item.id }}
+            </span>
+
+            <div class="card-actions">
+
+              <button
+                type="button"
+                class="edit-btn"
+                (click)="openEditForm(item)"
+                title="Izmeni vest"
+              >
+                <i class="fa-solid fa-pen"></i>
+              </button>
+
+              <button
+                type="button"
+                class="delete-btn"
+                (click)="deleteNews(item)"
+                title="Obriši vest"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </div>
+
+
+    <nav
+      class="pagination"
+      *ngIf="totalPages > 1"
+      aria-label="Paginacija admin vesti"
+    >
+      <!-- Prethodna stranica -->
+      <button
+        type="button"
+        class="pagination-arrow"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)"
+        aria-label="Prethodna strana"
+      >
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <!-- Brojevi stranica i trotačke -->
+      <ng-container *ngFor="let page of paginationItems">
+        <span
+          class="pagination-ellipsis"
+          *ngIf="page === 'ellipsis'"
+          aria-hidden="true"
+        >
+          …
+        </span>
+
+        <button
+          type="button"
+          class="pagination-page"
+          *ngIf="page !== 'ellipsis'"
+          [class.active]="currentPage === page"
+          [attr.aria-current]="currentPage === page ? 'page' : null"
+          [attr.aria-label]="'Stranica ' + page"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <!-- Sledeća stranica -->
+      <button
+        type="button"
+        class="pagination-arrow"
+        [disabled]="currentPage === totalPages"
+        (click)="goToPage(currentPage + 1)"
+        aria-label="Sledeća strana"
+      >
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </nav>
+
+
+  </section>
+
+  <!-- ========================================= -->
+<!-- DELETE CONFIRMATION MODAL -->
+<!-- ========================================= -->
+
+<div
+  class="delete-modal-overlay"
+  *ngIf="deleteModalVisible"
+  (click)="closeDeleteModal()"
+>
+
+  <div
+    class="delete-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-modal-title"
+    (click)="$event.stopPropagation()"
+  >
+
+    <!-- ICON -->
+
+    <div class="delete-modal-icon">
+      <i class="fa-solid fa-trash-can"></i>
+    </div>
+
+
+    <!-- CONTENT -->
+
+    <div class="delete-modal-content">
+
+      <span class="delete-modal-label">
+        POTVRDA BRISANJA
+      </span>
+
+      <h2 id="delete-modal-title">
+        Obriši vest?
+      </h2>
+
+      <p>
+        Da li ste sigurni da želite da obrišete ovu vest?
+      </p>
+
+      <div
+        class="delete-modal-news"
+        *ngIf="newsToDelete"
+      >
+        <i class="fa-regular fa-newspaper"></i>
+
+        <span>
+          {{ newsToDelete.title }}
+        </span>
+      </div>
+
+      <p class="delete-modal-warning">
+        Ova radnja je trajna i vest neće moći da se vrati.
+      </p>
+
+    </div>
+
+
+    <!-- ACTIONS -->
+
+    <div class="delete-modal-actions">
+
+      <button
+        type="button"
+        class="delete-modal-cancel"
+        (click)="closeDeleteModal()"
+        [disabled]="deleting"
+      >
+        Otkaži
+      </button>
+
+      <button
+        type="button"
+        class="delete-modal-confirm"
+        (click)="confirmDelete()"
+        [disabled]="deleting"
+      >
+
+        <i
+          class="fa-solid"
+          [class.fa-trash-can]="!deleting"
+          [class.fa-spinner]="deleting"
+          [class.fa-spin]="deleting"
+        ></i>
+
+        <span>
+          {{ deleting ? 'Brisanje...' : 'Obriši vest' }}
+        </span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+</div>

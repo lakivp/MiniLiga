@@ -1,0 +1,144 @@
+<header class="admin-navbar">
+
+  <div class="navbar-inner">
+
+    <a
+      routerLink="/admin"
+      class="admin-brand"
+      (click)="closeMenu()"
+    >
+
+      <span class="brand-mark">
+        <img
+          src="assets/logo.png"
+          alt="INTERTOTO logo"
+        />
+      </span>
+
+      <span class="brand-content">
+
+        <strong>
+          INTERTOTO
+        </strong>
+
+        <small>
+          ADMIN PANEL
+        </small>
+
+      </span>
+
+    </a>
+
+
+    <button
+      type="button"
+      class="mobile-toggle"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="mobileMenuOpen"
+    >
+
+      <i
+        class="fa-solid"
+        [class.fa-bars]="!mobileMenuOpen"
+        [class.fa-xmark]="mobileMenuOpen"
+      ></i>
+
+    </button>
+
+
+    <nav
+      class="admin-navigation"
+      [class.open]="mobileMenuOpen"
+    >
+
+      <a
+        routerLink="/admin"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeMenu()"
+      >
+        <i class="fa-solid fa-gauge-high"></i>
+        <span>Dashboard</span>
+      </a>
+
+      <a
+        routerLink="/admin/takmicenja"
+        routerLinkActive="active"
+        (click)="closeMenu()"
+      >
+        <i class="fa-solid fa-trophy"></i>
+        <span>Takmičenja</span>
+      </a>
+
+      <a
+        routerLink="/admin/utakmice"
+        routerLinkActive="active"
+        (click)="closeMenu()"
+      >
+        <i class="fa-solid fa-futbol"></i>
+        <span>Utakmice</span>
+      </a>
+
+      <a
+        routerLink="/admin/timovi"
+        routerLinkActive="active"
+        (click)="closeMenu()"
+      >
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Timovi</span>
+      </a>
+
+
+      <a
+        routerLink="/admin/news"
+        routerLinkActive="active"
+        (click)="closeMenu()"
+      >
+        <i class="fa-regular fa-newspaper"></i>
+        <span>Vesti</span>
+      </a>
+
+
+      <div class="navbar-divider"></div>
+
+
+      <div class="admin-user">
+
+        <div class="user-icon">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+
+        <div class="user-info">
+
+          <strong>
+            {{ authService.getAdmin()?.name }}
+          </strong>
+
+          <span>
+            Administrator
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="logout-button"
+        (click)="logout()"
+      >
+
+        <i class="fa-solid fa-right-from-bracket"></i>
+
+        <span>
+          Odjava
+        </span>
+
+      </button>
+
+    </nav>
+
+  </div>
+
+</header>

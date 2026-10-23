@@ -1,0 +1,327 @@
+
+<section class="schedule-hero">
+  <div class="schedule-hero-content">
+    <span class="schedule-hero-label">INTERTOTO</span>
+    <h1>Raspored utakmica</h1>
+    <p>Pregled predstojećih utakmica i termina takmičenja.</p>
+  </div>
+</section>
+
+<main class="schedule-page">
+
+  <!-- FILTERI -->
+  <section class="schedule-filters">
+    <div class="filters-heading">
+      <div>
+        <span class="section-eyebrow">CENTAR UTAKMICA</span>
+        <h2>Pronađi utakmicu</h2>
+        <p>Izaberi takmičenje, fazu, grupu ili kolo.</p>
+      </div>
+
+      <button
+        type="button"
+        class="reset-filters"
+        (click)="resetFilters()">
+        <i class="fa-solid fa-rotate-left"></i>
+        Resetuj filtere
+      </button>
+    </div>
+
+    <div class="filters-grid">
+
+      <div class="filter-field competition-filter">
+        <label for="competition">Takmičenje</label>
+        <div class="select-wrapper">
+          <i class="fa-solid fa-trophy"></i>
+          <select
+            id="competition"
+            [(ngModel)]="selectedCompetitionId"
+            (ngModelChange)="onCompetitionChange()">
+            <option [ngValue]="null">Izaberi takmičenje</option>
+            <option
+              *ngFor="let competition of competitions"
+              [ngValue]="competition.id">
+              {{ competition.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label for="phase">Faza takmičenja</label>
+        <div class="select-wrapper">
+          <i class="fa-solid fa-diagram-project"></i>
+          <select
+            id="phase"
+            [(ngModel)]="selectedPhaseId"
+            (ngModelChange)="onPhaseChange()">
+            <option [ngValue]="null">Sve faze</option>
+            <option
+              *ngFor="let phase of phases"
+              [ngValue]="phase.id">
+              {{ phase.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div
+        class="filter-field"
+        [class.filter-disabled]="isKnockoutSelected">
+        <label for="group">Grupa</label>
+        <div class="select-wrapper">
+          <i class="fa-solid fa-people-group"></i>
+          <select
+            [(ngModel)]="selectedGroupId"
+            (ngModelChange)="onGroupChange()"
+            [disabled]="isKnockoutSelected || availableGroups.length === 0"
+          >
+            <option
+              *ngFor="let group of availableGroups"
+              [ngValue]="group.id"
+            >
+              {{ group.name }}
+            </option>
+          </select>
+        </div>
+        <small class="disabled-hint" *ngIf="isKnockoutSelected">
+          Nije dostupno u nokaut fazi
+        </small>
+      </div>
+
+      <div
+        class="filter-field"
+        [class.filter-disabled]="isKnockoutSelected">
+        <label for="round">Kolo</label>
+        <div class="select-wrapper">
+          <i class="fa-solid fa-list-ol"></i>
+          <select
+            [(ngModel)]="selectedRound"
+            [disabled]="isKnockoutSelected || availableRounds.length === 0"
+          >
+            <option
+              *ngFor="let round of availableRounds"
+              [ngValue]="round"
+            >
+              {{ round }}. kolo
+            </option>
+          </select>
+        </div>
+        <small class="disabled-hint" *ngIf="isKnockoutSelected">
+          Nije dostupno u nokaut fazi
+        </small>
+      </div>
+
+    </div>
+
+    <div class="filter-note">
+      <i class="fa-regular fa-calendar-check"></i>
+      Prikazuju se samo zakazane utakmice.
+    </div>
+  </section>
+
+  <!-- UKUPAN BROJ ZAKAZANIH UTAKMICA -->
+  <section class="schedule-stats" *ngIf="!loadingSchedule && results">
+    <div class="stat-card">
+      <div class="stat-icon total-icon">
+        <i class="fa-solid fa-calendar-days"></i>
+      </div>
+      <div>
+        <span>Zakazane utakmice</span>
+        <strong>{{ totalMatches }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- UČITAVANJE -->
+  <section
+    class="schedule-message"
+    *ngIf="loadingCompetitions || loadingSchedule">
+    <div class="loading-spinner"></div>
+    <h3>Učitavanje rasporeda</h3>
+    <p>Molimo sačekajte dok pripremimo utakmice.</p>
+  </section>
+
+  <!-- GREŠKA -->
+  <section
+    class="schedule-message error-message"
+    *ngIf="errorMessage && !loadingSchedule">
+    <div class="message-icon">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <h3>Došlo je do greške</h3>
+    <p>{{ errorMessage }}</p>
+    <button type="button" (click)="loadSchedule()">
+      Pokušaj ponovo
+    </button>
+  </section>
+
+  <!-- NEMA TAKMIČENJA -->
+  <section
+    class="schedule-message"
+    *ngIf="!loadingCompetitions && !errorMessage && competitions.length === 0">
+    <div class="message-icon">
+      <i class="fa-solid fa-trophy"></i>
+    </div>
+    <h3>Nema dostupnih takmičenja</h3>
+    <p>Trenutno nema takmičenja za prikaz.</p>
+  </section>
+
+  <!-- RASPORED -->
+  <ng-container *ngIf="!loadingSchedule && results && !errorMessage">
+
+    <div class="schedule-title-row">
+      <div>
+        <span class="section-eyebrow">TAKMIČENJE</span>
+        <h2>{{ results.competitionName }}</h2>
+      </div>
+
+      <span class="matches-count">
+        <i class="fa-solid fa-futbol"></i>
+        {{ totalMatches }} zakazanih utakmica
+      </span>
+    </div>
+
+    <div
+      class="schedule-sections"
+      *ngIf="scheduleSections.length > 0">
+
+      <section
+        class="round-section"
+        *ngFor="let section of scheduleSections">
+
+        <div class="round-heading">
+          <div class="round-heading-left">
+            <div class="round-icon">
+              <i class="fa-solid fa-trophy"></i>
+            </div>
+
+            <div>
+              <span class="round-phase">{{ section.phaseName }}</span>
+              <h3>
+                {{ section.groupName }}
+                <span *ngIf="section.round !== null">
+                  · {{ section.round }}. kolo
+                </span>
+              </h3>
+            </div>
+          </div>
+
+          <span class="round-match-count">
+            {{ section.matches.length }}
+            {{ section.matches.length === 1 ? 'utakmica' : 'utakmica' }}
+          </span>
+        </div>
+
+        <div class="matches-list">
+
+          <article
+            class="match-card"
+            *ngFor="let match of section.matches; trackBy: trackByMatch">
+
+            <!-- DATUM I VREME -->
+            <div class="match-date">
+              <div class="date-box">
+                <strong>{{ getDayNumber(match.matchDate) }}</strong>
+                <span>{{ getMonthShort(match.matchDate) }}</span>
+              </div>
+
+              <div class="date-details">
+                <span>{{ getMatchDate(match.matchDate) }}</span>
+                <strong>{{ getMatchTime(match.matchDate) }}</strong>
+              </div>
+            </div>
+
+            <!-- TIMOVI -->
+            <div class="match-teams">
+
+              <div class="match-team home-team">
+                <div class="team-logo">
+                  <img
+                    *ngIf="match.homeTeam?.logoUrl"
+                    [src]="getTeamLogoUrl(match.homeTeam.logoUrl)"
+                    [alt]="getTeamName(match.homeTeam)"
+                    loading="lazy">
+
+                  <span *ngIf="!match.homeTeam?.logoUrl">
+                    {{ getTeamInitials(match.homeTeam) }}
+                  </span>
+                </div>
+
+                <div class="team-info">
+                  <strong>{{ getTeamName(match.homeTeam) }}</strong>
+                  <small *ngIf="!match.homeTeam?.isResolved">
+                    Čeka se potvrda tima
+                  </small>
+                </div>
+              </div>
+
+              <div class="match-score">
+                <strong class="versus">VS</strong>
+                <span class="scheduled-label">
+                  <span class="status-dot"></span>
+                  ZAKAZANA
+                </span>
+              </div>
+
+              <div class="match-team away-team">
+                <div class="team-info">
+                  <strong>{{ getTeamName(match.awayTeam) }}</strong>
+                  <small *ngIf="!match.awayTeam?.isResolved">
+                    Čeka se potvrda tima
+                  </small>
+                </div>
+
+                <div class="team-logo">
+                  <img
+                    *ngIf="match.awayTeam?.logoUrl"
+                    [src]="getTeamLogoUrl(match.awayTeam.logoUrl)"
+                    [alt]="getTeamName(match.awayTeam)"
+                    loading="lazy">
+
+                  <span *ngIf="!match.awayTeam?.logoUrl">
+                    {{ getTeamInitials(match.awayTeam) }}
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- LOKACIJA -->
+            <div class="match-location">
+              <i class="fa-solid fa-location-dot"></i>
+              <span>
+                {{ match.location || 'Lokacija nije određena' }}
+              </span>
+            </div>
+
+          </article>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- NEMA ZAKAZANIH UTAKMICA -->
+    <section
+      class="schedule-message"
+      *ngIf="scheduleSections.length === 0">
+      <div class="message-icon">
+        <i class="fa-regular fa-calendar-xmark"></i>
+      </div>
+
+      <h3>Nema zakazanih utakmica</h3>
+      <p>
+        Za izabrano takmičenje ili filtere trenutno nema zakazanih utakmica.
+      </p>
+
+      <button
+        type="button"
+        (click)="resetFilters()"
+        *ngIf="selectedPhaseId !== null || selectedGroupId !== null || selectedRound !== null">
+        Prikaži sve zakazane utakmice
+      </button>
+    </section>
+
+  </ng-container>
+
+</main>

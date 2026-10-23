@@ -1,0 +1,354 @@
+<main class="home-page">
+
+  <!-- HERO -->
+  <section class="hero">
+
+    <div class="hero-background">
+      <div class="hero-grid"></div>
+      <div class="hero-orb hero-orb-1"></div>
+      <div class="hero-orb hero-orb-2"></div>
+    </div>
+
+    <div class="hero-content">
+
+      <div class="eyebrow">
+        <span class="eyebrow-live"></span>
+        <span>ZVANIČNI SAJT INTERTOTO LIGE</span>
+      </div>
+
+      <h1>
+        Fudbal.
+        <span>Strast.</span>
+        <br />
+        Intertoto.
+      </h1>
+
+      <p class="hero-description">
+        Sve što ti treba za praćenje Intertoto lige —
+        raspored, rezultati, tabela, ekipe, igrači i
+        najvažnija dešavanja na jednom mestu.
+      </p>
+
+      <div class="hero-actions">
+
+        <a
+          class="button-primary"
+          routerLink="/raspored">
+
+          <span>Prati raspored</span>
+
+          <span class="button-icon">
+            <fa-icon [icon]="icons.arrow"></fa-icon>
+          </span>
+
+        </a>
+
+        <a
+          class="button-secondary"
+          routerLink="/tabela">
+
+          <fa-icon [icon]="icons.trophy"></fa-icon>
+
+          <span>Tabela lige</span>
+
+        </a>
+
+      </div>
+
+      <div class="hero-meta">
+
+        <div class="hero-meta-item">
+          <span class="meta-icon">
+            <fa-icon [icon]="icons.trophy"></fa-icon>
+          </span>
+
+          <div>
+            <strong>Takmičenje</strong>
+            <span>Mali fudbal</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- HERO VISUAL -->
+    <div class="hero-visual">
+
+      <div class="visual-ring visual-ring-outer"></div>
+      <div class="visual-ring visual-ring-middle"></div>
+
+      <div class="hero-glow"></div>
+
+      <div class="hero-logo">
+
+        <div class="logo-shine"></div>
+
+        <img
+          src="assets/logo.png"
+          alt="Intertoto Liga"
+        />
+
+      </div>
+
+      <div class="floating-card floating-card-top">
+
+        <span class="floating-icon">
+          <fa-icon [icon]="icons.trophy"></fa-icon>
+        </span>
+
+        <div>
+          <small>TAKMIČENJE</small>
+          <strong>INTERTOTO</strong>
+        </div>
+
+      </div>
+
+      <div class="floating-card floating-card-bottom">
+
+        <span class="live-dot"></span>
+
+        <div>
+          <small>INTERTOTO LIGA</small>
+          <strong>SEZONA U TOKU</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- QUICK NAVIGATION -->
+  <section class="quick-section">
+
+    <div class="section-container">
+
+      <div class="section-heading">
+
+        <div class="section-heading-left">
+
+          <span class="section-kicker">
+            BRZ PRISTUP
+          </span>
+
+          <h2>
+            Sve što pratiš.
+            <span>Na jednom mestu.</span>
+          </h2>
+
+        </div>
+
+        <p>
+          Pristupi najvažnijim informacijama
+          Intertoto lige u samo jednom kliku.
+        </p>
+
+      </div>
+
+
+      <div class="quick-grid">
+
+        @for (item of quickLinks; track item.path) {
+
+          <a
+            class="quick-card"
+            [routerLink]="item.path">
+
+            <div class="quick-card-top">
+
+              <span class="quick-icon">
+                <fa-icon [icon]="item.icon"></fa-icon>
+              </span>
+
+              <span class="quick-number">
+                {{ item.number }}
+              </span>
+
+            </div>
+
+            <div class="quick-card-content">
+
+              <strong>
+                {{ item.title }}
+              </strong>
+
+              <small>
+                {{ item.description }}
+              </small>
+
+            </div>
+
+            <div class="quick-card-footer">
+
+              <span>
+                Pogledaj
+              </span>
+
+              <span class="quick-arrow">
+                <fa-icon [icon]="icons.arrow"></fa-icon>
+              </span>
+
+            </div>
+
+          </a>
+
+        }
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- FEATURE SECTION -->
+  <section class="feature-section">
+
+    <div class="feature-container">
+
+      <div class="feature-copy">
+
+        <span class="section-kicker">
+          INTERTOTO LIGA
+        </span>
+
+        <h2>
+          Svaki meč
+          <span>ima svoju priču.</span>
+        </h2>
+
+        <p>
+          Prati rezultate, raspored, plasman ekipa i
+          statistiku igrača kroz celu sezonu.
+          Sve informacije tvoje lige dostupne su
+          na jednom mestu.
+        </p>
+
+        <a
+          class="feature-link"
+          routerLink="/statistika">
+
+          <span>
+            Pogledaj statistiku
+          </span>
+
+          <fa-icon [icon]="icons.arrow"></fa-icon>
+
+        </a>
+
+      </div>
+
+
+      <div class="feature-stats">
+
+        <div class="feature-stat">
+
+          <span class="stat-icon">
+            <fa-icon [icon]="icons.trophy"></fa-icon>
+          </span>
+
+          <div>
+            <strong>01</strong>
+            <span>Tabela</span>
+          </div>
+
+        </div>
+
+        <div class="feature-stat">
+
+          <span class="stat-icon">
+            <fa-icon [icon]="icons.football"></fa-icon>
+          </span>
+
+          <div>
+            <strong>02</strong>
+            <span>Rezultati</span>
+          </div>
+
+        </div>
+
+        <div class="feature-stat">
+
+          <span class="stat-icon">
+            <fa-icon [icon]="icons.chart"></fa-icon>
+          </span>
+
+          <div>
+            <strong>03</strong>
+            <span>Statistika</span>
+          </div>
+
+        </div>
+
+        <div class="feature-stat">
+
+          <span class="stat-icon">
+            <fa-icon [icon]="icons.clock"></fa-icon>
+          </span>
+
+          <div>
+            <strong>04</strong>
+            <span>Raspored</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- BOTTOM CTA -->
+  <section class="cta-section">
+
+    <div class="cta-inner">
+
+      <div class="cta-decoration"></div>
+
+      <div class="cta-content">
+
+        <span class="section-kicker">
+          BUDI DEO LIGE
+        </span>
+
+        <h2>
+          Spremni za sledeći meč?
+        </h2>
+
+        <p>
+          Pogledaj raspored i saznaj kada tvoja ekipa
+          izlazi na teren.
+        </p>
+
+        <a
+          class="button-primary"
+          routerLink="/raspored">
+
+          <span>Pogledaj raspored</span>
+
+          <span class="button-icon">
+            <fa-icon [icon]="icons.arrow"></fa-icon>
+          </span>
+
+        </a>
+
+      </div>
+
+      <div class="cta-logo">
+
+        <img
+          src="assets/logo.png"
+          alt="Intertoto"
+        />
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>

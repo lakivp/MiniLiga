@@ -1,0 +1,230 @@
+<div class="news-page">
+
+  <!-- ========================================= -->
+  <!-- PAGE HEADER -->
+  <!-- ========================================= -->
+
+  <section class="news-hero">
+
+    <div class="hero-content">
+
+      <span class="hero-label">
+        INTERTOTO
+      </span>
+
+      <h1>
+        Najnovije vesti
+      </h1>
+
+      <p>
+        Pratite najnovija dešavanja, rezultate,
+        utakmice i sve važne informacije iz Intertoto lige.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================================= -->
+  <!-- LOADING -->
+  <!-- ========================================= -->
+
+  <div
+    class="loading-container"
+    *ngIf="loading"
+  >
+
+    <i class="fa-solid fa-spinner fa-spin"></i>
+
+    <span>
+      Učitavanje vesti...
+    </span>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- ERROR -->
+  <!-- ========================================= -->
+
+  <div
+    class="error-container"
+    *ngIf="!loading && errorMessage"
+  >
+
+    <i class="fa-solid fa-circle-exclamation"></i>
+
+    <span>
+      {{ errorMessage }}
+    </span>
+
+    <button
+      type="button"
+      (click)="loadNews()"
+    >
+      Pokušaj ponovo
+    </button>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- EMPTY -->
+  <!-- ========================================= -->
+
+  <div
+    class="empty-container"
+    *ngIf="!loading && !errorMessage && news.length === 0"
+  >
+
+    <div class="empty-icon">
+      <i class="fa-regular fa-newspaper"></i>
+    </div>
+
+    <h2>
+      Trenutno nema vesti
+    </h2>
+
+    <p>
+      Uskoro očekujte nove objave.
+    </p>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- NEWS -->
+  <!-- ========================================= -->
+
+  <section
+    class="news-content"
+    *ngIf="!loading && !errorMessage && news.length > 0"
+  >
+
+    <div class="news-grid">
+
+      <article
+        class="news-card"
+        *ngFor="let item of paginatedNews"
+        (click)="openNews(item.id)"
+      >
+
+        <!-- IMAGE -->
+
+        <div class="news-image">
+
+          <img
+            *ngIf="item.imageUrl"
+            [src]="getImageUrl(item.imageUrl)"
+            [alt]="item.title"
+            loading="lazy"
+          />
+
+          <div
+            class="no-image"
+            *ngIf="!item.imageUrl"
+          >
+
+            <i class="fa-regular fa-newspaper"></i>
+
+          </div>
+
+          <div class="image-overlay"></div>
+
+          <div class="news-date">
+
+            <i class="fa-regular fa-calendar"></i>
+
+            {{ formatDate(item.createdAt) }}
+
+          </div>
+
+        </div>
+
+
+        <!-- CONTENT -->
+
+        <div class="news-card-content">
+
+          <h2>
+            {{ item.title }}
+          </h2>
+
+          <p>
+            {{ getShortContent(item.content) }}
+          </p>
+
+
+          <div class="read-more">
+
+            <span>
+              Pročitaj više
+            </span>
+
+            <i class="fa-solid fa-arrow-right"></i>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </div>
+
+
+    <nav
+      class="pagination"
+      *ngIf="totalPages > 1"
+      aria-label="Paginacija vesti"
+    >
+      <!-- Prethodna stranica -->
+      <button
+        type="button"
+        class="pagination-arrow"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)"
+        aria-label="Prethodna strana"
+      >
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <!-- Brojevi stranica -->
+      <ng-container *ngFor="let page of paginationItems">
+        <span
+          class="pagination-ellipsis"
+          *ngIf="page === 'ellipsis'"
+          aria-hidden="true"
+        >
+          …
+        </span>
+
+        <button
+          type="button"
+          class="pagination-page"
+          *ngIf="page !== 'ellipsis'"
+          [class.active]="currentPage === page"
+          [attr.aria-current]="currentPage === page ? 'page' : null"
+          [attr.aria-label]="'Stranica ' + page"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <!-- Sledeća stranica -->
+      <button
+        type="button"
+        class="pagination-arrow"
+        [disabled]="currentPage === totalPages"
+        (click)="goToPage(currentPage + 1)"
+        aria-label="Sledeća strana"
+      >
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </nav>
+
+
+  </section>
+
+</div>

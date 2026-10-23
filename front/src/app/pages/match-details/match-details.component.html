@@ -1,0 +1,576 @@
+@if (loading) {
+
+  <main class="page-wrapper">
+    <div class="state-card">
+      <div class="loading-spinner"></div>
+      <span>Učitavanje utakmice...</span>
+    </div>
+  </main>
+
+}
+@else if (error) {
+
+  <main class="page-wrapper">
+    <div class="state-card error-state">
+      <div class="state-icon">!</div>
+
+      <h3>Došlo je do greške</h3>
+
+      <p>{{ error }}</p>
+    </div>
+  </main>
+
+}
+@else if (match) {
+
+  <main class="match-page">
+
+    <!-- ================================================= -->
+    <!-- MATCH HERO -->
+    <!-- ================================================= -->
+
+    <section class="match-hero">
+
+      <div class="hero-top">
+
+        <span class="competition-label">
+          <span class="competition-dot"></span>
+          INTERTOTO
+        </span>
+
+        @if (match.isLive) {
+
+          <span class="live-badge">
+            <span class="live-dot"></span>
+            UŽIVO
+          </span>
+
+        }
+       @else {
+
+		  <span class="status-badge">
+		    {{ getStatusText(match.status) }}
+		  </span>
+
+		}
+
+      </div>
+
+
+      <div class="match-date">
+
+        <span>
+          {{ match.matchDate | date:'EEEE, dd. MMMM yyyy.' }}
+        </span>
+
+        <strong>
+          {{ match.matchDate | date:'HH:mm' }}
+        </strong>
+
+      </div>
+
+
+      <div class="teams-wrapper">
+
+        <!-- HOME TEAM -->
+
+        <div class="hero-team home-team">
+
+          <div class="team-logo-wrapper">
+
+            @if (match.homeTeam?.logoUrl) {
+
+              <img
+                class="team-logo"
+                [src]="match.homeTeam.logoUrl"
+                [alt]="match.homeTeam.name"
+              >
+
+            }
+            @else {
+
+              <div class="team-logo-placeholder">
+                {{ match.homeTeam?.name?.charAt(0) }}
+              </div>
+
+            }
+
+          </div>
+
+          <h1>
+            {{ match.homeTeam?.name }}
+          </h1>
+
+          @if (match.homeTeam?.shortName) {
+
+            <span class="team-short-name">
+              {{ match.homeTeam.shortName }}
+            </span>
+
+          }
+
+        </div>
+
+
+        <!-- SCORE -->
+
+        <div class="score-center">
+
+          <div class="score">
+
+            <span class="home-score">
+              {{ match.homeScore }}
+            </span>
+
+            <span class="score-separator">
+              :
+            </span>
+
+            <span class="away-score">
+              {{ match.awayScore }}
+            </span>
+
+          </div>
+
+          @if (match.isLive) {
+
+            <div class="live-indicator">
+              <span></span>
+              MEČ JE U TOKU
+            </div>
+
+          }
+          @else if (isFinished()) {
+
+			  <div class="finished-indicator">
+			    ZAVRŠENO
+			  </div>
+
+			}
+
+        </div>
+
+
+        <!-- AWAY TEAM -->
+
+        <div class="hero-team away-team">
+
+          <div class="team-logo-wrapper">
+
+            @if (match.awayTeam?.logoUrl) {
+
+              <img
+                class="team-logo"
+                [src]="match.awayTeam.logoUrl"
+                [alt]="match.awayTeam.name"
+              >
+
+            }
+            @else {
+
+              <div class="team-logo-placeholder">
+                {{ match.awayTeam?.name?.charAt(0) }}
+              </div>
+
+            }
+
+          </div>
+
+          <h1>
+            {{ match.awayTeam?.name }}
+          </h1>
+
+          @if (match.awayTeam?.shortName) {
+
+            <span class="team-short-name">
+              {{ match.awayTeam.shortName }}
+            </span>
+
+          }
+
+        </div>
+
+      </div>
+
+
+      @if (match.location) {
+
+        <div class="match-location">
+
+          <span class="location-icon">
+            ●
+          </span>
+
+          {{ match.location }}
+
+        </div>
+
+      }
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- EVENTS -->
+    <!-- ================================================= -->
+
+    <section class="content-card events-card">
+
+      <div class="section-header">
+
+        <div>
+          <span class="section-kicker">
+            LIVE CENTAR
+          </span>
+
+          <h2>
+            Događaji utakmice
+          </h2>
+        </div>
+
+        @if (match.isLive) {
+
+          <span class="section-live">
+            <span></span>
+            LIVE
+          </span>
+
+        }
+
+      </div>
+
+
+      <ng-template #eventRow let-event>
+        <div
+          class="event-row"
+          [class.event-goal]="event.type === 0"
+          [class.event-card]="event.type === 1 || event.type === 2"
+          [class.event-substitution]="event.type === 4"
+        >
+          <div class="event-minute">{{ event.minute }}'</div>
+          <div class="event-marker">
+            <span>{{ getEventIcon(event.type) }}</span>
+          </div>
+          <div class="event-content">
+            <div class="event-main">
+              <strong>{{ getEventText(event.type) }}</strong>
+              @if (event.playerName) {
+                <span class="event-player">{{ event.playerName }}</span>
+              }
+            </div>
+
+            @if (event.relatedPlayerName) {
+              <div class="event-related">
+                <span class="arrow">→</span>
+                <span>{{ event.relatedPlayerName }}</span>
+              </div>
+            }
+
+            @if (event.description) {
+              <p class="event-description">{{ event.description }}</p>
+            }
+          </div>
+        </div>
+      </ng-template>
+
+      @if (match.events?.length) {
+
+        <div class="events-columns">
+          <section class="team-events home-events">
+            <div class="team-events-heading">
+              @if (match.homeTeam?.logoUrl) {
+                <img [src]="match.homeTeam.logoUrl" [alt]="match.homeTeam.name">
+              }
+              <h3>{{ match.homeTeam?.name || 'Domaćin' }}</h3>
+            </div>
+            <div class="events-timeline">
+              @for (event of getTeamEvents(match.homeTeam?.id); track event.id) {
+                <ng-container *ngTemplateOutlet="eventRow; context: { $implicit: event }"></ng-container>
+              } @empty {
+                <p class="team-events-empty">Nema događaja domaćina.</p>
+              }
+            </div>
+          </section>
+
+          <section class="team-events away-events">
+            <div class="team-events-heading">
+              @if (match.awayTeam?.logoUrl) {
+                <img [src]="match.awayTeam.logoUrl" [alt]="match.awayTeam.name">
+              }
+              <h3>{{ match.awayTeam?.name || 'Gost' }}</h3>
+            </div>
+            <div class="events-timeline">
+              @for (event of getTeamEvents(match.awayTeam?.id); track event.id) {
+                <ng-container *ngTemplateOutlet="eventRow; context: { $implicit: event }"></ng-container>
+              } @empty {
+                <p class="team-events-empty">Nema događaja gosta.</p>
+              }
+            </div>
+          </section>
+        </div>
+
+      }
+      @else {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            ⚽
+          </div>
+
+          <h3>
+            Nema događaja
+          </h3>
+
+          <p>
+            Događaji utakmice će biti prikazani ovde.
+          </p>
+
+        </div>
+
+      }
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- LINEUPS -->
+    <!-- ================================================= -->
+
+    <section class="lineups-section">
+
+      <div class="section-title">
+
+        <span class="section-kicker">
+          TIMOVI
+        </span>
+
+        <h2>
+          Sastavi
+        </h2>
+
+        <p>
+          Sastavi timova
+        </p>
+
+      </div>
+
+
+      <div class="lineups-grid">
+
+        <!-- ================================================= -->
+        <!-- HOME LINEUP -->
+        <!-- ================================================= -->
+
+        <div class="lineup-card">
+
+          <div class="lineup-header">
+
+            <div class="lineup-team-info">
+
+              @if (match.homeTeam?.logoUrl) {
+
+                <img
+                  [src]="match.homeTeam.logoUrl"
+                  [alt]="match.homeTeam.name"
+                >
+
+              }
+              @else {
+
+                <div class="small-team-placeholder">
+                  {{ match.homeTeam?.name?.charAt(0) }}
+                </div>
+
+              }
+
+              <div>
+
+                <span>
+                  DOMAĆIN
+                </span>
+
+                <h3>
+                  {{ match.homeTeam?.name }}
+                </h3>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="lineup-content">
+
+            <div class="lineup-category">
+
+              <div class="category-title">
+
+                <span class="category-dot"></span>
+
+                <h4>
+                  SASTAV
+                </h4>
+
+              </div>
+
+
+              <div class="players-list">
+
+                @for (
+                  player of match.homeLineup;
+                  track player.id
+                ) {
+
+                  @if (player.isStarter || player.isSubstitute) {
+
+                    <div class="player-row">
+
+                      <div class="player-number">
+                        {{ player.jerseyNumber ?? '-' }}
+                      </div>
+
+                      <div class="player-info">
+
+                        <strong>
+                          {{ player.playerName }}
+                        </strong>
+
+                        @if (player.position) {
+
+                          <span>
+                            {{ player.position }}
+                          </span>
+
+                        }
+
+                      </div>
+
+                    </div>
+
+                  }
+
+                }
+
+              </div>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- AWAY LINEUP -->
+        <!-- ================================================= -->
+
+        <div class="lineup-card">
+
+          <div class="lineup-header">
+
+            <div class="lineup-team-info">
+
+              @if (match.awayTeam?.logoUrl) {
+
+                <img
+                  [src]="match.awayTeam.logoUrl"
+                  [alt]="match.awayTeam.name"
+                >
+
+              }
+              @else {
+
+                <div class="small-team-placeholder">
+                  {{ match.awayTeam?.name?.charAt(0) }}
+                </div>
+
+              }
+
+              <div>
+
+                <span>
+                  GOST
+                </span>
+
+                <h3>
+                  {{ match.awayTeam?.name }}
+                </h3>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="lineup-content">
+
+            <div class="lineup-category">
+
+              <div class="category-title">
+
+                <span class="category-dot"></span>
+
+                <h4>
+                  SASTAV
+                </h4>
+
+              </div>
+
+
+              <div class="players-list">
+
+                @for (
+                  player of match.awayLineup;
+                  track player.id
+                ) {
+
+                  @if (player.isStarter || player.isSubstitute) {
+
+                    <div class="player-row">
+
+                      <div class="player-number">
+                        {{ player.jerseyNumber ?? '-' }}
+                      </div>
+
+                      <div class="player-info">
+
+                        <strong>
+                          {{ player.playerName }}
+                        </strong>
+
+                        @if (player.position) {
+
+                          <span>
+                            {{ player.position }}
+                          </span>
+
+                        }
+
+                      </div>
+
+                    </div>
+
+                  }
+
+                }
+
+              </div>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+}

@@ -1,0 +1,402 @@
+
+<div class="admin-page">
+  <div class="page-container">
+
+    <header class="page-header">
+      <div class="header-content">
+        <div class="header-icon">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+
+        <div class="header-text">
+          <span class="eyebrow">ADMINISTRACIJA TAKMIČENJA</span>
+          <h1>{{ phaseName }}</h1>
+          <p>Upravljanje utakmicama knockout faze</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="goBackToCompetition()"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Nazad na takmičenje</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="createMatch()"
+          [disabled]="loading"
+        >
+          <i class="fa-solid fa-plus"></i>
+          <span>Nova utakmica</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="alert alert-success" *ngIf="success">
+      <i class="fa-solid fa-circle-check"></i>
+      <span>{{ success }}</span>
+      <button type="button" (click)="success = ''" aria-label="Zatvori">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="alert alert-error" *ngIf="error">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>{{ error }}</span>
+      <button type="button" (click)="error = ''" aria-label="Zatvori">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <section class="content-card matches-card">
+      <div class="section-header">
+        <div>
+          <span class="eyebrow">RASPORED</span>
+          <h2>
+            <i class="fa-solid fa-futbol"></i>
+            Utakmice faze
+          </h2>
+          <p>Sve utakmice koje pripadaju ovoj knockout fazi.</p>
+        </div>
+
+        <span class="count-badge">
+          {{ matches.length }} utakmica
+        </span>
+      </div>
+      
+        <!-- PRETRAGA I FILTERI -->
+        <div class="matches-toolbar">
+
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input
+            #teamSearch
+            type="search"
+            [value]="searchTerm"
+            (input)="onSearchChange(teamSearch.value)"
+            placeholder="Pretraži po imenu tima..."
+            aria-label="Pretraga utakmica po imenu tima"
+            />
+
+            <button
+            *ngIf="searchTerm"
+            type="button"
+            class="clear-search"
+            (click)="onSearchChange('')"
+            aria-label="Obriši pretragu"
+            title="Obriši pretragu"
+            >
+            <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="status-filters" aria-label="Filter statusa utakmica">
+
+            <button
+            type="button"
+            class="filter-button"
+            [class.active]="statusFilter === 'all'"
+            [attr.aria-pressed]="statusFilter === 'all'"
+            (click)="setStatusFilter('all')"
+            >
+            Sve utakmice
+            </button>
+
+            <button
+            type="button"
+            class="filter-button"
+            [class.active]="statusFilter === 'scheduled'"
+            [attr.aria-pressed]="statusFilter === 'scheduled'"
+            (click)="setStatusFilter('scheduled')"
+            >
+            <span class="filter-dot scheduled-dot"></span>
+            Zakazane
+            </button>
+
+            <button
+            type="button"
+            class="filter-button"
+            [class.active]="statusFilter === 'finished'"
+            [attr.aria-pressed]="statusFilter === 'finished'"
+            (click)="setStatusFilter('finished')"
+            >
+            <span class="filter-dot finished-dot"></span>
+            Završene
+            </button>
+
+        </div>
+
+        </div>
+
+      <div class="matches-loading" *ngIf="loading">
+        <div class="loading-spinner"></div>
+        <span>Učitavanje utakmica...</span>
+      </div>
+
+      <div
+        class="matches-empty"
+        *ngIf="!loading && filteredMatchesCount === 0"      
+      >
+        <div class="empty-icon">
+          <i class="fa-solid fa-calendar-xmark"></i>
+        </div>
+
+        <h3>
+        {{ matches.length === 0 ? 'Nema utakmica' : 'Nema rezultata' }}
+        </h3>
+
+        <p>
+        {{
+            matches.length === 0
+            ? 'Za ovu knockout fazu još nije kreirana nijedna utakmica.'
+            : 'Promeni filter ili pokušaj sa drugim imenom tima.'
+        }}
+        </p>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="createMatch()"
+          *ngIf="matches.length === 0"
+        >
+          <i class="fa-solid fa-plus"></i>
+          Dodaj prvu utakmicu
+        </button>
+      </div>
+
+      <div
+        class="matches-list"
+        *ngIf="!loading && filteredMatchesCount > 0"      
+        >
+        <article
+          class="match-card"
+          *ngFor="let match of paginatedMatches"          
+          (click)="openMatch(match.id)"
+          (keydown.enter)="openMatch(match.id)"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'Detalji utakmice: ' +
+            (match.homeTeam?.name ?? 'TBD') + ' - ' +
+            (match.awayTeam?.name ?? 'TBD')"
+        >
+          <div class="match-date">
+            <strong>{{ formatMatchDate(match.matchDate) }}</strong>
+            <span>{{ formatMatchTime(match.matchDate) }}</span>
+          </div>
+
+          <div class="match-teams">
+            <div class="match-team home">
+              <div class="team-info">
+                <span>{{ match.homeTeam?.name ?? 'TBD' }}</span>
+
+                <img
+                  *ngIf="match.homeTeam?.logoUrl"
+                  [src]="match.homeTeam?.logoUrl"
+                  [alt]="match.homeTeam?.name ?? 'Domaći tim'"
+                />
+
+                <div
+                  class="team-logo-placeholder"
+                  *ngIf="!match.homeTeam?.logoUrl"
+                >
+                  <i class="fa-solid fa-shield"></i>
+                </div>
+              </div>
+
+              <strong class="score" *ngIf="hasMatchStarted(match)">
+                {{ match.homeScore }}
+              </strong>
+            </div>
+
+            <div class="match-separator">
+              {{ hasMatchStarted(match) ? ':' : 'VS' }}
+            </div>
+
+            <div class="match-team away">
+              <strong class="score" *ngIf="hasMatchStarted(match)">
+                {{ match.awayScore }}
+              </strong>
+
+              <div class="team-info">
+                <img
+                  *ngIf="match.awayTeam?.logoUrl"
+                  [src]="match.awayTeam?.logoUrl"
+                  [alt]="match.awayTeam?.name ?? 'Gostujući tim'"
+                />
+
+                <div
+                  class="team-logo-placeholder"
+                  *ngIf="!match.awayTeam?.logoUrl"
+                >
+                  <i class="fa-solid fa-shield"></i>
+                </div>
+
+                <span>{{ match.awayTeam?.name ?? 'TBD' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="match-meta">
+            <span
+              class="status-badge"
+              [ngClass]="getMatchStatusClass(match.status)"
+            >
+              <span class="status-dot"></span>
+              {{ getMatchStatusText(match.status) }}
+            </span>
+
+            <span class="location" *ngIf="match.location">
+              <i class="fa-solid fa-location-dot"></i>
+              {{ match.location }}
+            </span>
+          </div>
+
+          <div class="match-actions">
+            <button
+              *ngIf="canDeleteMatch(match)"
+              type="button"
+              class="match-delete-button"
+              title="Obriši zakazanu utakmicu"
+              aria-label="Obriši zakazanu utakmicu"
+              [disabled]="deletingMatch"
+              (click)="requestDeleteMatch($event, match)"
+            >
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+
+            <div class="match-arrow" aria-hidden="true">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </div>
+        </article>
+      </div>
+      
+    <!-- PAGINACIJA -->
+    <div
+    class="pagination"
+    *ngIf="!loading && filteredMatchesCount > 0"
+    >
+    <div class="pagination-info">
+        Prikazano
+        <strong>{{ firstVisibleMatch }}–{{ lastVisibleMatch }}</strong>
+        od
+        <strong>{{ filteredMatchesCount }}</strong>
+        utakmica
+    </div>
+
+    <div class="pagination-controls">
+
+        <button
+        type="button"
+        class="pagination-arrow"
+        (click)="previousPage()"
+        [disabled]="currentPage === 1"
+        aria-label="Prethodna stranica"
+        title="Prethodna stranica"
+        >
+        <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <ng-container *ngFor="let item of paginationItems">
+        <span
+            *ngIf="item === 'dots'"
+            class="pagination-dots"
+            aria-hidden="true"
+        >
+            …
+        </span>
+
+        <button
+            *ngIf="item !== 'dots'"
+            type="button"
+            class="pagination-number"
+            [class.active]="currentPage === item"
+            [attr.aria-current]="currentPage === item ? 'page' : null"
+            (click)="goToPage(+item)"
+        >
+            {{ item }}
+        </button>
+        </ng-container>
+
+        <button
+            type="button"
+            class="pagination-arrow"
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+            aria-label="Sledeća stranica"
+            title="Sledeća stranica"
+        >
+        <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+    </div>
+    </div>
+
+    </section>
+  </div>
+</div>
+
+<div
+  class="modal-overlay confirmation-overlay"
+  *ngIf="matchToDelete"
+  (click)="cancelDeleteMatch()"
+>
+  <section
+    class="modal-card confirmation-modal delete-match-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-match-title"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="confirmation-icon danger-icon">
+      <i class="fa-solid fa-trash-can"></i>
+    </div>
+
+    <h2 id="delete-match-title">Brisanje utakmice</h2>
+
+    <p>
+      Da li ste sigurni da želite da obrišete zakazanu utakmicu
+      <strong>
+        {{ matchToDelete.homeTeam?.name ?? 'TBD' }} –
+        {{ matchToDelete.awayTeam?.name ?? 'TBD' }}
+      </strong>?
+    </p>
+
+    <div class="confirmation-note delete-match-note">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>Brisanje zakazane utakmice je trajna akcija.</span>
+    </div>
+
+    <div class="modal-footer confirmation-actions">
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="cancelDeleteMatch()"
+        [disabled]="deletingMatch"
+      >
+        Odustani
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="confirmDeleteMatch()"
+        [disabled]="deletingMatch"
+      >
+        <i
+          class="fa-solid"
+          [class.fa-spinner]="deletingMatch"
+          [class.fa-spin]="deletingMatch"
+          [class.fa-trash-can]="!deletingMatch"
+        ></i>
+        {{ deletingMatch ? 'Brisanje...' : 'Obriši utakmicu' }}
+      </button>
+    </div>
+  </section>
+</div>

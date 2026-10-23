@@ -1,0 +1,72 @@
+
+<header class="site-header">
+  <div class="header-inner">
+
+    <a class="brand" routerLink="/" (click)="closeMenu()">
+      <span class="brand-icon">
+        <img src="assets/logo.png" alt="INTERTOTO logo">
+      </span>
+
+      <span class="brand-text">
+        <strong>INTERTOTO</strong>
+        <small>LIGA U MALOM FUDBALU</small>
+      </span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Glavna navigacija">
+      <a
+        *ngFor="let item of navItems"
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.path === '/' }">
+        {{ item.label }}
+      </a>
+    </nav>
+
+    <div class="header-actions">
+      <a
+        class="admin-panel-link desktop-admin-link"
+        routerLink="/admin/login"
+        aria-label="Otvori admin panel">
+        <fa-icon [icon]="icons.admin"></fa-icon>
+        <span>Admin panel</span>
+      </a>
+
+      <button
+        class="menu-toggle"
+        type="button"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen"
+        aria-label="Otvori ili zatvori meni">
+
+        <fa-icon
+          [icon]="menuOpen ? icons.close : icons.bars">
+        </fa-icon>
+      </button>
+    </div>
+  </div>
+
+  <nav
+    class="mobile-nav"
+    [class.open]="menuOpen"
+    aria-label="Mobilna navigacija">
+
+    <a
+      *ngFor="let item of navItems"
+      [routerLink]="item.path"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+      (click)="closeMenu()">
+      {{ item.label }}
+    </a>
+
+    <a
+      class="mobile-admin-link"
+      routerLink="/admin/login"
+      (click)="closeMenu()">
+      <fa-icon [icon]="icons.admin"></fa-icon>
+      Admin panel
+      <fa-icon class="mobile-admin-arrow" [icon]="icons.chevronDown"></fa-icon>
+    </a>
+  </nav>
+</header>

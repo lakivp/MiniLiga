@@ -1,0 +1,311 @@
+<div class="contact-page">
+
+  <!-- ========================================================= -->
+  <!-- HERO -->
+  <!-- ========================================================= -->
+
+  <section class="contact-hero">
+
+    <div class="hero-background-circle circle-one"></div>
+    <div class="hero-background-circle circle-two"></div>
+
+    <div class="contact-container">
+
+      <div class="hero-content">
+
+        <span class="hero-label">
+          <span class="label-line"></span>
+          KONTAKT
+        </span>
+
+        <h1>
+          Hajde da
+          <span>razgovaramo.</span>
+        </h1>
+
+        <p>
+          Imaš pitanje, predlog ili želiš da saznaš više o
+          Intertoto ligi? Tu smo za tebe.
+        </p>
+
+      </div>
+
+      <div class="hero-decoration">
+
+        <div class="decoration-circle">
+          <i class="fa-solid fa-paper-plane"></i>
+        </div>
+
+        <div class="decoration-line line-one"></div>
+        <div class="decoration-line line-two"></div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- CONTACT INFO -->
+  <!-- ========================================================= -->
+
+  <section class="contact-info-section">
+
+    <div class="contact-container">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          INFORMACIJE
+        </span>
+
+        <h2>
+          Kontaktiraj
+          <span>nas.</span>
+        </h2>
+
+        <p>
+          Za sva pitanja u vezi sa ligom, utakmicama, ekipama,
+          igračima ili saradnjom, slobodno nam se obrati.
+        </p>
+
+      </div>
+
+
+      <div class="contact-info-grid">
+
+        <div
+          class="contact-card"
+          *ngFor="let item of contactItems"
+        >
+
+          <div class="contact-card-icon">
+            <i [class]="item.icon"></i>
+          </div>
+
+          <div class="contact-card-content">
+
+            <span class="contact-card-label">
+              {{ item.label }}
+            </span>
+
+            <a
+              *ngIf="item.href"
+              [href]="item.href"
+              class="contact-card-value"
+            >
+              {{ item.value }}
+            </a>
+
+            <span
+              *ngIf="!item.href"
+              class="contact-card-value"
+            >
+              {{ item.value }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- SOCIAL -->
+  <!-- ========================================================= -->
+
+  <section class="social-section">
+
+    <div class="contact-container">
+
+      <div class="social-wrapper">
+
+        <div class="social-heading">
+
+          <span class="section-label">
+            DRUŠTVENE MREŽE
+          </span>
+
+          <h2>
+            Budite deo
+            <span>priče.</span>
+          </h2>
+
+          <p>
+            Pratite Intertoto i budite u toku sa svim
+            dešavanjima iz lige.
+          </p>
+
+        </div>
+
+
+        <div class="social-grid">
+
+          <a
+            *ngFor="let social of socialLinks"
+            [href]="social.href"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-card"
+          >
+
+            <div class="social-icon">
+              <i [class]="social.icon"></i>
+            </div>
+
+            <div class="social-content">
+
+              <strong>
+                {{ social.name }}
+              </strong>
+
+              <span>
+                {{ social.description }}
+              </span>
+
+            </div>
+
+            <div class="social-arrow">
+              <i class="fa-solid fa-arrow-up-right"></i>
+            </div>
+
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- LOCATION -->
+  <!-- ========================================================= -->
+
+  <section class="location-section">
+
+    <div class="contact-container">
+
+      <div class="location-card">
+
+        <div class="location-content">
+
+          <span class="section-label">
+            GDE SE NALAZIMO
+          </span>
+
+          <h2>
+            <span>Intertoto</span>
+            je tamo gde se igra fudbal.
+          </h2>
+
+          <p>
+            Naša liga okuplja ekipe i igrače širom Srbije.
+            Pratite raspored, rezultate i sva dešavanja
+            na jednom mestu.
+          </p>
+
+          <div class="location-details">
+
+            <div class="location-detail">
+              <div class="detail-icon">
+                <i class="fa-solid fa-location-dot"></i>
+              </div>
+
+              <div>
+                <span>Lokacija</span>
+                <strong>Vukasovićeva 21a, Kanarevo brdo</strong>
+              </div>
+            </div>
+
+            <div class="location-detail">
+              <div class="detail-icon">
+                <i class="fa-solid fa-futbol"></i>
+              </div>
+
+              <div>
+                <span>Takmičenje</span>
+                <strong>Intertoto Liga</strong>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="location-visual">
+
+          <div class="visual-grid"></div>
+
+          <div class="stadium-circle">
+
+            <div class="stadium-inner">
+              <i class="fa-solid fa-futbol"></i>
+            </div>
+
+          </div>
+
+          <div class="visual-label">
+            <span>INTERTOTO</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- CTA -->
+  <!-- ========================================================= -->
+
+  <section class="contact-cta">
+
+    <div class="cta-background"></div>
+
+    <div class="contact-container">
+
+      <div class="cta-content">
+
+        <span class="cta-label">
+          INTERTOTO
+        </span>
+
+        <h2>
+          Fudbal je više
+          <span>od rezultata.</span>
+        </h2>
+
+        <p>
+          Ljudi, ekipe, rivalstva i priče koje
+          ostaju dugo nakon poslednjeg zvižduka.
+        </p>
+
+      </div>
+
+      <div class="cta-ball">
+
+        <div class="ball-ring ring-one"></div>
+        <div class="ball-ring ring-two"></div>
+
+        <i class="fa-solid fa-futbol"></i>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

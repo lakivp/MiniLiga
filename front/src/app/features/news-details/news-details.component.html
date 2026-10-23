@@ -1,0 +1,109 @@
+<div class="news-details-page">
+
+  <!-- ========================================= -->
+  <!-- LOADING -->
+  <!-- ========================================= -->
+
+  <div
+    class="loading-container"
+    *ngIf="loading"
+  >
+
+    <i class="fa-solid fa-spinner fa-spin"></i>
+
+    <span>
+      Učitavanje vesti...
+    </span>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- ERROR -->
+  <!-- ========================================= -->
+
+  <div
+    class="error-page"
+    *ngIf="!loading && errorMessage"
+  >
+
+    <div class="error-icon">
+
+      <i class="fa-regular fa-newspaper"></i>
+
+    </div>
+
+    <h1>
+      Vest nije pronađena
+    </h1>
+
+    <p>
+      {{ errorMessage }}
+    </p>
+
+    <button
+      type="button"
+      (click)="goBack()"
+    >
+      <i class="fa-solid fa-arrow-left"></i>
+
+      Nazad na vesti
+    </button>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- NEWS DETAILS -->
+  <!-- ========================================= -->
+
+  <article
+    class="article"
+    *ngIf="!loading && news"
+  >
+
+    <header class="article-hero">
+      <div class="article-hero-inner">
+        <button
+          type="button"
+          class="back-button"
+          (click)="goBack()"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Nazad na vesti</span>
+        </button>
+
+        <div class="article-header">
+          <div class="article-meta">
+            <span class="article-date">
+              <i class="fa-regular fa-calendar"></i>
+              {{ formatDate(news.createdAt) }}
+            </span>
+          </div>
+
+          <h1>{{ news.title }}</h1>
+        </div>
+      </div>
+    </header>
+
+    <main class="article-main">
+      <figure
+        class="article-image"
+        *ngIf="news.imageUrl"
+      >
+        <img
+          [src]="getImageUrl(news.imageUrl)"
+          [alt]="news.title"
+        />
+      </figure>
+
+      <div class="article-content">
+        <div class="article-text">{{ news.content }}</div>
+      </div>
+
+      
+    </main>
+
+  </article>
+
+</div>

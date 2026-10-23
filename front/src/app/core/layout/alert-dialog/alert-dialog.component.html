@@ -1,0 +1,51 @@
+<div
+  class="alert-backdrop"
+  *ngIf="alertDialog.message$ | async as message"
+  (click)="close()"
+>
+
+  <section
+    class="alert-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="alert-dialog-title"
+    aria-describedby="alert-dialog-message"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="alert-dialog-heading">
+
+      <div class="alert-dialog-icon">
+        <i class="fa-solid fa-circle-exclamation"></i>
+      </div>
+
+      <button
+        type="button"
+        class="alert-dialog-close"
+        aria-label="Zatvori obaveštenje"
+        (click)="close()"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+    <div class="alert-dialog-content">
+      <span class="alert-dialog-eyebrow">OBAVEŠTENJE</span>
+      <h2 id="alert-dialog-title">Proveri unos</h2>
+      <p id="alert-dialog-message">{{ message }}</p>
+    </div>
+
+    <div class="alert-dialog-actions">
+      <button
+        type="button"
+        class="alert-dialog-confirm"
+        (click)="close()"
+      >
+        U redu
+      </button>
+    </div>
+
+  </section>
+
+</div>

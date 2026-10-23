@@ -1,0 +1,734 @@
+<section class="standings-page">
+
+  <!-- =====================================================
+       HERO
+  ====================================================== -->
+
+  <section class="standings-hero">
+
+    <div class="hero-pattern"></div>
+
+    <div class="container hero-content">
+
+      <div class="hero-copy">
+
+        <div class="hero-eyebrow">
+          <span class="eyebrow-line"></span>
+          INTERTOTO / TAKMIČENJE
+        </div>
+
+        <h1>
+          Tabela
+          <span>plasmana.</span>
+        </h1>
+
+        <p>
+          Pratite rezultate, bodove i pozicije svih timova
+          kroz ligaški deo i playoff fazu takmičenja.
+        </p>
+
+        <div class="hero-tags">
+
+          <span>
+            <i class="fa-solid fa-ranking-star"></i>
+            Plasman
+          </span>
+
+          <span>
+            <i class="fa-solid fa-chart-simple"></i>
+            Statistika
+          </span>
+
+          <span>
+            <i class="fa-solid fa-trophy"></i>
+            Takmičenje
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="hero-visual">
+
+        <div class="hero-circle hero-circle-one"></div>
+        <div class="hero-circle hero-circle-two"></div>
+
+        <div class="hero-trophy">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+
+        <div class="hero-visual-label">
+          <span>PUT DO VRHA</span>
+          <strong>THE RACE IS ON</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="hero-bottom-line"></div>
+
+  </section>
+
+
+  <!-- =====================================================
+       CONTENT
+  ====================================================== -->
+
+  <div class="container standings-content">
+
+
+    <!-- ===================================================
+         COMPETITION FILTER
+    ==================================================== -->
+
+    <section
+      class="competition-filter"
+      *ngIf="!loadingCompetitions"
+    >
+
+      <div class="filter-left">
+
+        <div class="filter-icon">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+
+        <div class="filter-description">
+
+          <span class="filter-label">
+            IZBOR TAKMIČENJA
+          </span>
+
+          <strong>
+            Pregled plasmana
+          </strong>
+
+          <small>
+            Izaberite takmičenje za prikaz tabela
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <div class="filter-select-wrapper">
+
+        <select
+          [(ngModel)]="selectedCompetitionId"
+          (ngModelChange)="onCompetitionChange()"
+          [disabled]="loadingStandings"
+          aria-label="Izaberi takmičenje"
+        >
+
+          <option
+            *ngFor="let competition of competitions"
+            [ngValue]="competition.id"
+          >
+            {{ competition.name }}
+          </option>
+
+        </select>
+
+        <i class="fa-solid fa-chevron-down"></i>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         LOADING COMPETITIONS
+    ==================================================== -->
+
+    <div
+      class="state-box"
+      *ngIf="loadingCompetitions"
+    >
+
+      <div class="spinner"></div>
+
+      <strong>
+        Učitavanje takmičenja...
+      </strong>
+
+    </div>
+
+
+    <!-- ===================================================
+         ERROR
+    ==================================================== -->
+
+    <div
+      class="error-box"
+      *ngIf="
+        !loadingCompetitions &&
+        errorMessage
+      "
+    >
+
+      <div class="error-icon">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================
+         NO COMPETITIONS
+    ==================================================== -->
+
+    <div
+      class="state-box empty-state"
+      *ngIf="
+        !loadingCompetitions &&
+        !errorMessage &&
+        competitions.length === 0
+      "
+    >
+
+      <div class="empty-icon">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+
+      <strong>
+        Nema aktivnih takmičenja
+      </strong>
+
+      <span>
+        Trenutno nema aktivnog takmičenja sa dostupnom tabelom.
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================
+         MAIN CONTENT
+    ==================================================== -->
+
+    <ng-container
+      *ngIf="
+        !loadingCompetitions &&
+        !errorMessage &&
+        standings
+      "
+    >
+
+
+      <!-- =================================================
+           COMPETITION HEADING
+      ================================================== -->
+
+      <div class="competition-heading">
+
+        <div class="competition-heading-left">
+
+          <span class="section-eyebrow">
+            TRENUTNO IZABRANO TAKMIČENJE
+          </span>
+
+          <h2>
+            {{ standings.competitionName }}
+          </h2>
+
+          <p>
+            Zvaničan pregled plasmana po fazama takmičenja.
+          </p>
+
+        </div>
+
+
+        <div class="competition-meta">
+
+          <div class="meta-icon">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+
+          <div class="meta-content">
+
+            <strong>
+              {{ standings.phases.length }}
+            </strong>
+
+            <span>
+              {{ standings.phases.length === 1 ? 'faza' : 'faze' }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           LOADING STANDINGS
+      ================================================== -->
+
+      <div
+        class="statistics-loading"
+        *ngIf="loadingStandings"
+      >
+
+        <div class="spinner"></div>
+
+        <span>
+          Učitavanje tabela...
+        </span>
+
+      </div>
+
+
+      <!-- =================================================
+           PHASES
+      ================================================== -->
+
+      <div
+        class="phases"
+        *ngIf="
+          !loadingStandings &&
+          standings.phases.length > 0
+        "
+      >
+
+
+        <!-- ===============================================
+             PHASE
+        ================================================ -->
+
+        <section
+          class="phase-section"
+          *ngFor="
+            let phase of standings.phases;
+            let phaseIndex = index
+          "
+        >
+
+
+          <!-- =============================================
+               PHASE HEADER
+          ============================================== -->
+
+          <div class="phase-header">
+
+            <div class="phase-number">
+              <span>
+                {{ (phaseIndex + 1).toString().padStart(2, '0') }}
+              </span>
+            </div>
+
+
+            <div class="phase-title">
+
+              <span class="phase-kicker">
+                {{ isLeague(phase) ? 'LIGAŠKI DEO' : 'PLAYOFF FAZA' }}
+              </span>
+
+              <h2>
+                {{ phase.name }}
+              </h2>
+
+            </div>
+
+
+            <div class="phase-badge">
+
+              <i
+                class="fa-solid"
+                [class.fa-table-list]="isLeague(phase)"
+                [class.fa-layer-group]="isPlayoff(phase)"
+              ></i>
+
+              <span>
+                {{ phase.tables.length }}
+                {{ phase.tables.length === 1 ? 'tabela' : 'tabele' }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- =============================================
+               TABLES
+          ============================================== -->
+
+          <div class="phase-tables">
+
+
+            <article
+              class="standings-card"
+              *ngFor="let table of phase.tables"
+            >
+
+
+              <!-- =========================================
+                   TABLE CARD HEADER
+              ========================================== -->
+
+              <header class="table-card-header">
+
+                <div class="table-title">
+
+                  <div class="table-icon">
+
+                    <i
+                      class="fa-solid"
+                      [class.fa-users]="table.groupId !== null"
+                      [class.fa-ranking-star]="table.groupId === null"
+                    ></i>
+
+                  </div>
+
+
+                  <div class="table-title-text">
+
+                    <span>
+                      {{
+                        table.groupId !== null
+                          ? 'TAKMIČARSKA GRUPA'
+                          : 'UKUPAN PLASMAN FAZE'
+                      }}
+                    </span>
+
+                    <h3>
+                      {{ table.groupName }}
+                    </h3>
+
+                  </div>
+
+                </div>
+
+
+                <div class="table-summary">
+
+                  <strong>
+                    {{ getTeamCount(table) }}
+                  </strong>
+
+                  <span>
+                    TIMOVA
+                  </span>
+
+                </div>
+
+              </header>
+
+
+              <!-- =========================================
+                   TABLE
+              ========================================== -->
+
+              <div
+                class="standings-table"
+                *ngIf="table.teams.length > 0"
+              >
+
+
+                <!-- =======================================
+                     TABLE HEAD
+                ======================================== -->
+
+                <div class="table-head">
+
+                  <span class="head-position">
+                    #
+                  </span>
+
+                  <span class="head-team">
+                    TIM
+                  </span>
+
+                  <span title="Odigrano">
+                    U
+                  </span>
+
+                  <span title="Pobede">
+                    P
+                  </span>
+
+                  <span title="Nerešeno">
+                    N
+                  </span>
+
+                  <span title="Porazi">
+                    I
+                  </span>
+
+                  <span title="Postignuti i primljeni golovi">
+                    GR
+                  </span>
+
+                  <span title="Gol razlika">
+                    +/-
+                  </span>
+
+                  <span
+                    class="head-points"
+                    title="Bodovi"
+                  >
+                    BOD
+                  </span>
+
+                </div>
+
+
+                <!-- =======================================
+                     TEAM ROW
+                ======================================== -->
+
+                <div
+                  class="team-row"
+                  *ngFor="let team of table.teams"
+                  [class.top-team]="team.position === 1"
+                >
+
+
+                  <!-- POSITION -->
+
+                  <div class="team-position">
+
+                    <span
+                      class="position-number"
+                      [class.position-first]="team.position === 1"
+                    >
+                      {{ team.position }}
+                    </span>
+
+                    
+
+                  </div>
+
+
+                  <!-- TEAM -->
+
+                  <div class="team-info">
+
+                    <div class="team-logo">
+
+                      <img
+                        *ngIf="team.logoUrl"
+                        [src]="getTeamLogoUrl(team.logoUrl)"
+                        [alt]="team.teamName"
+                      />
+
+                      <span
+                        *ngIf="!team.logoUrl"
+                        class="team-initials"
+                      >
+                        {{ getTeamInitials(team) }}
+                      </span>
+
+                    </div>
+
+
+                    <div class="team-name">
+
+                      <strong>
+                        {{ team.teamName }}
+                      </strong>
+
+                      <small *ngIf="team.shortName">
+                        {{ team.shortName }}
+                      </small>
+
+                    </div>
+
+                  </div>
+
+
+                  <!-- PLAYED -->
+
+                  <div
+                    class="team-stat"
+                    data-label="U"
+                  >
+                    <span>
+                      {{ team.played }}
+                    </span>
+                  </div>
+
+
+                  <!-- WINS -->
+
+                  <div
+                    class="team-stat win-stat"
+                    data-label="P"
+                  >
+                    <span>
+                      {{ team.wins }}
+                    </span>
+                  </div>
+
+
+                  <!-- DRAWS -->
+
+                  <div
+                    class="team-stat"
+                    data-label="N"
+                  >
+                    <span>
+                      {{ team.draws }}
+                    </span>
+                  </div>
+
+
+                  <!-- LOSSES -->
+
+                  <div
+                    class="team-stat loss-stat"
+                    data-label="I"
+                  >
+                    <span>
+                      {{ team.losses }}
+                    </span>
+                  </div>
+
+
+                  <!-- GOALS -->
+
+                  <div
+                    class="team-stat goals-stat"
+                    data-label="GR"
+                  >
+                    <span>
+                      {{ team.goalsFor }}:{{ team.goalsAgainst }}
+                    </span>
+                  </div>
+
+
+                  <!-- DIFFERENCE -->
+
+                  <div
+                    class="team-stat difference-stat"
+                    data-label="+/-"
+                    [class.positive]="team.goalDifference > 0"
+                    [class.negative]="team.goalDifference < 0"
+                  >
+                    <span>
+                      {{ formatGoalDifference(team.goalDifference) }}
+                    </span>
+                  </div>
+
+
+                  <!-- POINTS -->
+
+                  <div class="team-points">
+
+                    <strong>
+                      {{ team.points }}
+                    </strong>
+
+                    <span>
+                      BOD
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- =========================================
+                   EMPTY TABLE
+              ========================================== -->
+
+              <div
+                class="empty-table"
+                *ngIf="table.teams.length === 0"
+              >
+
+                <div class="empty-table-icon">
+                  <i class="fa-solid fa-users"></i>
+                </div>
+
+                <strong>
+                  Tabela je prazna
+                </strong>
+
+                <span>
+                  Timovi još nisu dodati u ovu grupu.
+                </span>
+
+              </div>
+
+
+              <!-- =========================================
+                   TABLE FOOTER
+              ========================================== -->
+
+              <footer class="table-card-footer">
+
+                <div class="table-info">
+
+                  <i class="fa-solid fa-circle-info"></i>
+
+                  <span>
+                    Plasman prema završenim utakmicama.
+                  </span>
+
+                </div>
+
+
+                <span class="matches-count">
+
+                  <i class="fa-regular fa-futbol"></i>
+
+                  {{ getPlayedMatches(table) }}
+
+                  {{
+                    getPlayedMatches(table) === 1
+                      ? 'utakmica'
+                      : 'utakmica'
+                  }}
+
+                </span>
+
+              </footer>
+
+            </article>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- =================================================
+           NO STANDINGS
+      ================================================== -->
+
+      <div
+        class="state-box no-standings"
+        *ngIf="
+          !loadingStandings &&
+          standings.phases.length === 0
+        "
+      >
+
+        <div class="empty-icon">
+          <i class="fa-solid fa-table-list"></i>
+        </div>
+
+        <strong>
+          Tabele još nisu dostupne
+        </strong>
+
+        <span>
+          Za ovo takmičenje trenutno nema ligaške ili playoff faze sa tabelom.
+        </span>
+
+      </div>
+
+    </ng-container>
+
+  </div>
+
+</section>

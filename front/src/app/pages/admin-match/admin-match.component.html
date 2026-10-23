@@ -1,0 +1,1326 @@
+@if (loading) {
+
+  <main class="admin-page">
+
+    <div class="state-card">
+
+      <div class="spinner"></div>
+
+      <span>
+        Učitavanje utakmice...
+      </span>
+
+    </div>
+
+  </main>
+
+}
+@else if (error) {
+
+  <main class="admin-page">
+
+    <div class="state-card error">
+
+      <div class="error-icon">
+        !
+      </div>
+
+      <h2>
+        Greška
+      </h2>
+
+      <p>
+        {{ error }}
+      </p>
+
+    </div>
+
+  </main>
+
+}
+@else if (match) {
+
+  <main class="admin-page">
+
+
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
+
+    <section class="admin-header">
+
+      <div>
+
+        <span class="eyebrow">
+          ADMINISTRACIJA UTAKMICE
+        </span>
+
+        <h1>
+
+          {{ match.homeTeam?.name }}
+
+          <span>
+            vs
+          </span>
+
+          {{ match.awayTeam?.name }}
+
+        </h1>
+
+        <p>
+          {{ match.matchDate | date:'dd.MM.yyyy. HH:mm' }}
+        </p>
+
+      </div>
+
+
+      <div class="status-area">
+
+        <span
+          class="status"
+          [class.live]="isLive()"
+          [class.finished]="isFinished()"
+        >
+
+          @if (isLive()) {
+
+            <span class="live-dot"></span>
+
+          }
+
+          {{ getStatusText(match.status) }}
+
+        </span>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ===================================================== -->
+    <!-- SCORE -->
+    <!-- ===================================================== -->
+
+    <section class="score-card">
+
+
+      <!-- HOME -->
+
+      <div class="score-team">
+
+        @if (match.homeTeam?.logoUrl) {
+
+          <img
+            [src]="match.homeTeam.logoUrl"
+            [alt]="match.homeTeam.name"
+          >
+
+        }
+
+        <strong>
+          {{ match.homeTeam?.name }}
+        </strong>
+
+      </div>
+
+
+
+      <!-- SCORE -->
+
+      <div class="score-center">
+
+        <div class="score">
+
+          {{ match.homeScore }}
+
+          <span>
+            :
+          </span>
+
+          {{ match.awayScore }}
+
+        </div>
+
+        <small>
+          {{ getStatusText(match.status) }}
+        </small>
+
+      </div>
+
+
+
+      <!-- AWAY -->
+
+      <div class="score-team">
+
+        @if (match.awayTeam?.logoUrl) {
+
+          <img
+            [src]="match.awayTeam.logoUrl"
+            [alt]="match.awayTeam.name"
+          >
+
+        }
+
+        <strong>
+          {{ match.awayTeam?.name }}
+        </strong>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ===================================================== -->
+    <!-- MATCH CONTROLS -->
+    <!-- ===================================================== -->
+
+    <section class="control-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <span class="eyebrow">
+            KONTROLA
+          </span>
+
+          <h2>
+            Upravljanje utakmicom
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="control-actions">
+
+
+        <!-- START -->
+
+        @if (isScheduled()) {
+
+          <button
+            type="button"
+            class="btn btn-start"
+            [disabled]="starting"
+            (click)="openMatchActionConfirmation('start')"
+          >
+
+            @if (starting) {
+
+              Pokretanje...
+
+            }
+            @else {
+
+              ▶ ZAPOČNI UTAKMICU
+
+            }
+
+          </button>
+
+        }
+
+
+
+        <!-- FINISH -->
+
+        @if (isLive()) {
+
+          <button
+            type="button"
+            class="btn btn-finish"
+            [disabled]="finishing"
+            (click)="openMatchActionConfirmation('finish')"
+          >
+
+            @if (finishing) {
+
+              Završavanje...
+
+            }
+            @else {
+
+              ■ ZAVRŠI UTAKMICU
+
+            }
+
+          </button>
+
+        }
+
+
+
+        <!-- FINISHED -->
+
+        @if (isFinished()) {
+
+          <div class="finished-message">
+
+            ✓ Utakmica je završena
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ===================================================== -->
+    <!-- LIVE EVENT FORM -->
+    <!-- ===================================================== -->
+
+    @if (isLive()) {
+
+      <section class="event-control-card">
+
+
+        <div class="card-header">
+
+          <div>
+
+            <span class="eyebrow">
+              LIVE ZAPISNIK
+            </span>
+
+            <h2>
+              Dodaj događaj
+            </h2>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="event-form">
+
+
+          <!-- ================================================= -->
+          <!-- EVENT TYPE -->
+          <!-- ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Tip događaja
+            </label>
+
+            <select
+              [(ngModel)]="selectedEventType"
+              (ngModelChange)="onEventTypeChange()"
+            >
+
+              <option [ngValue]="0">
+                ⚽ Gol
+              </option>
+
+              <option [ngValue]="1">
+                🟨 Žuti karton
+              </option>
+
+              <option [ngValue]="2">
+                🟥 Crveni karton
+              </option>
+
+              <option [ngValue]="3">
+                🎯 Asistencija
+              </option>
+
+              <option [ngValue]="4">
+                🔄 Izmena
+              </option>
+
+            </select>
+
+          </div>
+
+
+
+          <!-- ================================================= -->
+          <!-- MINUTE -->
+          <!-- ================================================= -->
+
+          <div class="form-group small">
+
+            <label>
+              Minut
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="minute"
+            >
+
+          </div>
+
+
+
+          <!-- ================================================= -->
+          <!-- PLAYER -->
+          <!-- ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+
+              @if (selectedEventType === 4) {
+
+                Igrač koji izlazi
+
+              }
+              @else {
+
+                Igrač
+
+              }
+
+            </label>
+
+
+            <select
+              [(ngModel)]="selectedPlayerId"
+            >
+
+              <option [ngValue]="null">
+                Izaberi igrača
+              </option>
+
+
+              <optgroup [label]="'DOMAĆIN — ' + (match.homeTeam?.name ?? 'Domaćin')">
+
+              @for (
+                player of getHomePlayersForSelectedEvent();
+                track player.id
+              ) {
+
+                <option
+                  [ngValue]="player.playerId"
+                >
+
+                  {{ getFullPlayerName(
+                    player.playerId,
+                    player.playerName
+                  ) }}
+
+                  @if (player.jerseyNumber != null) {
+
+                    — #{{ player.jerseyNumber }}
+
+                  }
+
+                </option>
+
+              }
+
+              </optgroup>
+
+              <optgroup [label]="'GOST — ' + (match.awayTeam?.name ?? 'Gost')">
+
+              @for (
+                player of getAwayPlayersForSelectedEvent();
+                track player.id
+              ) {
+
+                <option
+                  [ngValue]="player.playerId"
+                >
+
+                  {{ getFullPlayerName(
+                    player.playerId,
+                    player.playerName
+                  ) }}
+
+                  @if (player.jerseyNumber != null) {
+
+                    — #{{ player.jerseyNumber }}
+
+                  }
+
+                </option>
+
+              }
+
+              </optgroup>
+
+            </select>
+
+          </div>
+
+
+
+          <!-- ================================================= -->
+          <!-- SUBSTITUTION - PLAYER IN -->
+          <!-- ================================================= -->
+
+          @if (selectedEventType === 4) {
+
+            <div class="form-group">
+
+              <label>
+                Igrač koji ulazi
+              </label>
+
+
+              <select
+                [(ngModel)]="selectedRelatedPlayerId"
+              >
+
+                <option [ngValue]="null">
+                  Izaberi igrača
+                </option>
+
+
+                <optgroup [label]="'DOMAĆIN — ' + (match.homeTeam?.name ?? 'Domaćin')">
+
+                @for (
+                  player of getHomePlayersForSubstitution();
+                  track player.id
+                ) {
+
+                  <option
+                    [ngValue]="player.playerId"
+                  >
+
+                    {{ getFullPlayerName(
+                      player.playerId,
+                      player.playerName
+                    ) }}
+
+                    @if (player.jerseyNumber != null) {
+
+                      — #{{ player.jerseyNumber }}
+
+                    }
+
+                  </option>
+
+                }
+
+                </optgroup>
+
+                <optgroup [label]="'GOST — ' + (match.awayTeam?.name ?? 'Gost')">
+
+                @for (
+                  player of getAwayPlayersForSubstitution();
+                  track player.id
+                ) {
+
+                  <option
+                    [ngValue]="player.playerId"
+                  >
+
+                    {{ getFullPlayerName(
+                      player.playerId,
+                      player.playerName
+                    ) }}
+
+                    @if (player.jerseyNumber != null) {
+
+                      — #{{ player.jerseyNumber }}
+
+                    }
+
+                  </option>
+
+                }
+
+                </optgroup>
+
+              </select>
+
+            </div>
+
+          }
+
+
+
+          <!-- ================================================= -->
+          <!-- DESCRIPTION -->
+          <!-- ================================================= -->
+
+          <div class="form-group description">
+
+            <label>
+              Napomena
+            </label>
+
+            <input
+              type="text"
+              [(ngModel)]="description"
+              placeholder="Opcionalna napomena..."
+            >
+
+          </div>
+
+
+
+          <!-- ================================================= -->
+          <!-- ADD EVENT -->
+          <!-- ================================================= -->
+
+          <button
+            type="button"
+            class="btn btn-add"
+            [disabled]="saving"
+            (click)="addEvent()"
+          >
+
+            @if (saving) {
+
+              Dodavanje...
+
+            }
+            @else {
+
+              + DODAJ DOGAĐAJ
+
+            }
+
+          </button>
+
+        </div>
+
+      </section>
+
+    }
+
+
+
+    <!-- ===================================================== -->
+    <!-- EVENTS -->
+    <!-- ===================================================== -->
+
+    <section class="events-card">
+
+
+      <div class="card-header">
+
+        <div>
+
+          <span class="eyebrow">
+            ZAPISNIK
+          </span>
+
+          <h2>
+            Događaji utakmice
+          </h2>
+
+        </div>
+
+
+        <span class="event-count">
+
+          {{ match.events?.length ?? 0 }}
+
+        </span>
+
+      </div>
+
+
+
+      @if (match.events?.length) {
+
+        <div class="event-team-grid">
+
+          @for (eventGroup of getEventGroups(); track eventGroup.sideLabel) {
+
+            <section class="event-team-column">
+
+              <header class="event-team-heading">
+
+                @if (eventGroup.logoUrl) {
+                  <img [src]="eventGroup.logoUrl" [alt]="eventGroup.teamName">
+                } @else {
+                  <span class="event-team-placeholder">
+                    <i class="fa-solid fa-shield-halved"></i>
+                  </span>
+                }
+
+                <div>
+                  <span>{{ eventGroup.sideLabel }}</span>
+                  <strong>{{ eventGroup.teamName }}</strong>
+                </div>
+
+                <span class="event-team-count">{{ eventGroup.events.length }}</span>
+
+              </header>
+
+              @if (eventGroup.events.length) {
+
+                <div class="events-list">
+
+                  @for (event of eventGroup.events; track event.id) {
+
+                    <div class="event-item">
+
+                      <div class="event-icon">
+                        {{ getEventIcon(event.type) }}
+                      </div>
+
+                      <div class="event-minute">
+                        {{ event.minute }}'
+                      </div>
+
+                      <div class="event-info">
+
+                        <strong>{{ getEventText(event.type) }}</strong>
+
+                        @if (event.playerId || event.playerName) {
+                          <span>
+                            {{ getFullPlayerName(event.playerId, event.playerName) }}
+                          </span>
+                        }
+
+                        @if (event.type === 4 && (event.relatedPlayerId || event.relatedPlayerName)) {
+                          <span class="related">
+                            → {{ getFullPlayerName(event.relatedPlayerId, event.relatedPlayerName) }}
+                          </span>
+                        }
+
+                        @if (event.description) {
+                          <small>{{ event.description }}</small>
+                        }
+
+                      </div>
+                        @if (isLive()) {
+                          <button
+                            type="button"
+                            class="delete-button"
+                            [disabled]="!isLive()"
+                            (click)="openDeleteEventConfirmation(event.id)"
+                            title="Obriši događaj"
+                          >
+                            ×
+                          </button>
+                        }
+
+                    </div>
+
+                  }
+
+                </div>
+
+              } @else {
+
+                <div class="event-team-empty">
+                  Nema događaja za ovaj tim.
+                </div>
+
+              }
+
+            </section>
+
+          }
+
+        </div>
+
+      }
+      @else {
+
+        <div class="empty">
+
+          Nema zabeleženih događaja.
+
+        </div>
+
+      }
+
+    </section>
+
+
+
+    <!-- ===================================================== -->
+    <!-- LINEUPS -->
+    <!-- ===================================================== -->
+
+    <section class="lineups-section">
+
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          SASTAVI
+        </span>
+
+        <h2>
+          Igrači
+        </h2>
+
+      </div>
+
+
+
+      <div class="lineups-grid">
+
+
+        <!-- ================================================= -->
+        <!-- HOME LINEUP -->
+        <!-- ================================================= -->
+
+        <div class="lineup-card">
+
+
+          <!-- HEADER -->
+
+          <div class="lineup-header">
+
+            @if (match.homeTeam?.logoUrl) {
+
+              <img
+                [src]="match.homeTeam.logoUrl"
+                [alt]="match.homeTeam.name"
+              >
+
+            }
+
+
+            <div>
+
+              <span>
+                DOMAĆIN
+              </span>
+
+              <h3>
+                {{ match.homeTeam?.name }}
+              </h3>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- PLAYERS -->
+
+          <div class="players">
+
+
+            <!-- STARTING XI -->
+
+            <h4>
+              SASTAV
+            </h4>
+
+
+            @for (
+              player of match.homeLineup ?? [];
+              track player.id
+            ) {
+
+              @if (player.isStarter || player.isSubstitute) {
+
+                <div
+                  class="player"
+                  [class.inactive]="player.leftMinute != null"
+                >
+
+
+                  <span class="number">
+
+                    {{ player.jerseyNumber ?? '-' }}
+
+                  </span>
+
+
+                  <span>
+
+                    {{ getFullPlayerName(
+                      player.playerId,
+                      player.playerName
+                    ) }}
+
+                  </span>
+
+
+                  @if (player.leftMinute != null) {
+
+                    <small>
+
+                      {{ player.leftMinute }}'
+
+                    </small>
+
+                  }
+
+                </div>
+
+              }
+
+            }
+
+
+
+            <!-- SUBSTITUTES -->
+
+            <h4 class="bench-title">
+
+              REZERVE
+
+            </h4>
+
+
+            @for (
+              player of match.homeLineup ?? [];
+              track player.id
+            ) {
+
+              @if (
+                player.isSubstitute &&
+                player.enteredMinute == null
+              ) {
+
+                <div class="player substitute">
+
+
+                  <span class="number">
+
+                    {{ player.jerseyNumber ?? '-' }}
+
+                  </span>
+
+
+                  <span>
+
+                    {{ getFullPlayerName(
+                      player.playerId,
+                      player.playerName
+                    ) }}
+
+                  </span>
+
+                </div>
+
+              }
+
+            }
+
+
+
+            <!-- PLAYERS WHO ENTERED -->
+
+            @if (hasPlayersWhoEntered(match.homeLineup)) {
+
+              <h4 class="bench-title">
+
+                UŠLI U IGRU
+
+              </h4>
+
+
+              @for (
+                player of match.homeLineup ?? [];
+                track player.id
+              ) {
+
+                @if (
+                  player.isSubstitute &&
+                  player.enteredMinute != null
+                ) {
+
+                  <div
+                    class="player substitute entered"
+                    [class.inactive]="player.leftMinute != null"
+                  >
+
+
+                    <span class="number">
+
+                      {{ player.jerseyNumber ?? '-' }}
+
+                    </span>
+
+
+                    <span>
+
+                      {{ getFullPlayerName(
+                        player.playerId,
+                        player.playerName
+                      ) }}
+
+                    </span>
+
+
+                    <small>
+
+                      {{ player.enteredMinute }}'
+
+                      @if (player.leftMinute != null) {
+
+                        -
+                        {{ player.leftMinute }}'
+
+                      }
+
+                    </small>
+
+                  </div>
+
+                }
+
+              }
+
+            }
+
+          </div>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- AWAY LINEUP -->
+        <!-- ================================================= -->
+
+        <div class="lineup-card">
+
+
+          <!-- HEADER -->
+
+          <div class="lineup-header">
+
+            @if (match.awayTeam?.logoUrl) {
+
+              <img
+                [src]="match.awayTeam.logoUrl"
+                [alt]="match.awayTeam.name"
+              >
+
+            }
+
+
+            <div>
+
+              <span>
+                GOST
+              </span>
+
+              <h3>
+                {{ match.awayTeam?.name }}
+              </h3>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- PLAYERS -->
+
+          <div class="players">
+
+
+            <!-- STARTING XI -->
+
+            <h4>
+              SASTAV
+            </h4>
+
+
+            @for (
+              player of match.awayLineup ?? [];
+              track player.id
+            ) {
+
+              @if (player.isStarter || player.isSubstitute) {
+
+                <div
+                  class="player"
+                  [class.inactive]="player.leftMinute != null"
+                >
+
+
+                  <span class="number">
+
+                    {{ player.jerseyNumber ?? '-' }}
+
+                  </span>
+
+
+                  <span>
+
+                    {{ getFullPlayerName(
+                      player.playerId,
+                      player.playerName
+                    ) }}
+
+                  </span>
+
+
+                  @if (player.leftMinute != null) {
+
+                    <small>
+
+                      {{ player.leftMinute }}'
+
+                    </small>
+
+                  }
+
+                </div>
+
+              }
+
+            }
+
+
+
+            <!-- SUBSTITUTES -->
+
+            <h4 class="bench-title">
+
+              REZERVE
+
+            </h4>
+
+
+            @for (
+              player of match.awayLineup ?? [];
+              track player.id
+            ) {
+
+              @if (
+                player.isSubstitute &&
+                player.enteredMinute == null
+              ) {
+
+                <div class="player substitute">
+
+
+                  <span class="number">
+
+                    {{ player.jerseyNumber ?? '-' }}
+
+                  </span>
+
+
+                  <span>
+
+                    {{ getFullPlayerName(
+                      player.playerId,
+                      player.playerName
+                    ) }}
+
+                  </span>
+
+                </div>
+
+              }
+
+            }
+
+
+
+            <!-- PLAYERS WHO ENTERED -->
+
+            @if (hasPlayersWhoEntered(match.awayLineup)) {
+
+              <h4 class="bench-title">
+
+                UŠLI U IGRU
+
+              </h4>
+
+
+              @for (
+                player of match.awayLineup ?? [];
+                track player.id
+              ) {
+
+                @if (
+                  player.isSubstitute &&
+                  player.enteredMinute != null
+                ) {
+
+                  <div
+                    class="player substitute entered"
+                    [class.inactive]="player.leftMinute != null"
+                  >
+
+
+                    <span class="number">
+
+                      {{ player.jerseyNumber ?? '-' }}
+
+                    </span>
+
+
+                    <span>
+
+                      {{ getFullPlayerName(
+                        player.playerId,
+                        player.playerName
+                      ) }}
+
+                    </span>
+
+
+                    <small>
+
+                      {{ player.enteredMinute }}'
+
+                      @if (player.leftMinute != null) {
+
+                        -
+                        {{ player.leftMinute }}'
+
+                      }
+
+                    </small>
+
+                  </div>
+
+                }
+
+              }
+
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    @if (matchActionConfirmation) {
+
+      <div
+        class="match-confirm-backdrop"
+        (click)="closeMatchActionConfirmation()"
+      >
+
+        <section
+          class="match-confirm-dialog"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="match-confirm-title"
+          (click)="$event.stopPropagation()"
+        >
+
+          <div class="match-confirm-icon" [class.finish]="matchActionConfirmation === 'finish'">
+            <i class="fa-solid" [class.fa-play]="matchActionConfirmation === 'start'" [class.fa-flag-checkered]="matchActionConfirmation === 'finish'"></i>
+          </div>
+
+          <span class="match-confirm-eyebrow">
+            {{ matchActionConfirmation === 'start' ? 'POČETAK UTAKMICE' : 'ZAVRŠETAK UTAKMICE' }}
+          </span>
+
+          <h2 id="match-confirm-title">
+            {{ matchActionConfirmation === 'start' ? 'Započeti utakmicu?' : 'Završiti utakmicu?' }}
+          </h2>
+
+          @if (matchActionConfirmation === 'start') {
+            <p>Utakmica će preći u status uživo i moći ćeš da unosiš događaje.</p>
+          } @else {
+            <p>
+              Potvrdi završetak utakmice pri rezultatu
+              <strong>{{ match.homeScore }} : {{ match.awayScore }}</strong>.
+            </p>
+          }
+
+          <div class="match-confirm-actions">
+
+            <button
+              type="button"
+              class="match-confirm-cancel"
+              [disabled]="starting || finishing"
+              (click)="closeMatchActionConfirmation()"
+            >
+              Otkaži
+            </button>
+
+            <button
+              type="button"
+              class="match-confirm-submit"
+              [class.finish]="matchActionConfirmation === 'finish'"
+              [disabled]="starting || finishing"
+              (click)="confirmMatchAction()"
+            >
+              @if (starting || finishing) {
+                <span class="match-confirm-spinner"></span>
+              } @else {
+                <i class="fa-solid" [class.fa-play]="matchActionConfirmation === 'start'" [class.fa-flag-checkered]="matchActionConfirmation === 'finish'"></i>
+              }
+              {{ starting ? 'Pokretanje...' : finishing ? 'Završavanje...' : matchActionConfirmation === 'start' ? 'Započni' : 'Završi utakmicu' }}
+            </button>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    }
+
+    @if (deleteEventConfirmation) {
+
+      <div
+        class="match-confirm-backdrop"
+        (click)="closeDeleteEventConfirmation()"
+      >
+
+        <section
+          class="match-confirm-dialog delete-confirm-dialog"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="delete-event-confirm-title"
+          (click)="$event.stopPropagation()"
+        >
+
+          <div class="match-confirm-icon delete">
+            <i class="fa-solid fa-trash"></i>
+          </div>
+
+          <span class="match-confirm-eyebrow delete-eyebrow">
+            BRISANJE DOGAĐAJA
+          </span>
+
+          <h2 id="delete-event-confirm-title">
+            Obriši događaj?
+          </h2>
+
+          <p>
+            Da li si siguran da želiš da obrišeš ovaj događaj?
+            Ova radnja se ne može poništiti.
+          </p>
+
+          <div class="match-confirm-actions">
+
+            <button
+              type="button"
+              class="match-confirm-cancel"
+              (click)="closeDeleteEventConfirmation()"
+            >
+              Otkaži
+            </button>
+
+            <button
+              type="button"
+              class="match-confirm-submit delete-submit"
+              (click)="confirmDeleteEvent()"
+            >
+              <i class="fa-solid fa-trash"></i>
+              Obriši događaj
+            </button>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    }
+
+  </main>
+
+}

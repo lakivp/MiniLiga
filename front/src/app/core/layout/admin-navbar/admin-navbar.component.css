@@ -1,0 +1,353 @@
+:host {
+  display: block;
+}
+
+.admin-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+
+  background: #111111;
+  color: #ffffff;
+
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.14);
+}
+
+.navbar-inner {
+  width: 100%;
+  max-width: 1500px;
+
+  min-height: 72px;
+
+  margin: 0 auto;
+
+  padding: 0 28px;
+
+  display: flex;
+  align-items: center;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  color: #ffffff;
+
+  text-decoration: none;
+
+  flex-shrink: 0;
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+  overflow: hidden;
+
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+}
+
+.brand-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-content strong {
+  font-size: 14px;
+  letter-spacing: 1.5px;
+}
+
+.brand-content small {
+  margin-top: 2px;
+
+  color: #999999;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 1.5px;
+}
+
+.admin-navigation {
+  margin-left: auto;
+
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+}
+
+.admin-navigation > a {
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 0 13px;
+
+  border-radius: 9px;
+
+  color: #aaaaaa;
+
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-navigation > a:hover,
+.admin-navigation > a.active {
+  background: #242424;
+  color: #ffffff;
+}
+
+.admin-navigation > a i {
+  font-size: 13px;
+}
+
+.navbar-divider {
+  width: 1px;
+  height: 30px;
+
+  margin: 0 8px;
+
+  background: #333333;
+}
+
+.admin-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  margin-left: 5px;
+}
+
+.user-icon {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #242424;
+
+  color: #ffffff;
+
+  font-size: 13px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 110px;
+}
+
+.user-info strong {
+  color: #ffffff;
+
+  font-size: 11px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-info span {
+  margin-top: 2px;
+
+  color: #777777;
+
+  font-size: 9px;
+}
+
+.logout-button {
+  height: 40px;
+
+  margin-left: 8px;
+
+  padding: 0 13px;
+
+  border: 1px solid #333333;
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #aaaaaa;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background: #242424;
+  border-color: #444444;
+  color: #ffffff;
+}
+
+.mobile-toggle {
+  display: none;
+
+  margin-left: auto;
+
+  width: 42px;
+  height: 42px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #242424;
+
+  color: #ffffff;
+
+  font-size: 17px;
+
+  cursor: pointer;
+}
+
+@media (max-width: 1100px) {
+
+  .navbar-inner {
+    padding: 0 20px;
+  }
+
+  .admin-navigation > a {
+    padding: 0 9px;
+  }
+
+  .admin-navigation > a span {
+    display: none;
+  }
+
+  .user-info {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+
+  .navbar-inner {
+    min-height: 64px;
+
+    padding: 0 16px;
+
+    position: relative;
+  }
+
+  .mobile-toggle {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-navigation {
+    position: absolute;
+
+    top: 64px;
+    left: 0;
+    right: 0;
+
+    margin: 0;
+
+    padding: 12px 16px 18px;
+
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 4px;
+
+    background: #111111;
+
+    border-top: 1px solid #242424;
+
+    box-shadow:
+      0 15px 25px rgba(0, 0, 0, 0.18);
+  }
+
+  .admin-navigation.open {
+    display: flex;
+  }
+
+  .admin-navigation > a {
+    width: 100%;
+    height: 46px;
+
+    padding: 0 14px;
+
+    justify-content: flex-start;
+
+    font-size: 13px;
+  }
+
+  .admin-navigation > a span {
+    display: inline;
+  }
+
+  .navbar-divider {
+    width: 100%;
+    height: 1px;
+
+    margin: 8px 0;
+
+    background: #292929;
+  }
+
+  .admin-user {
+    margin: 4px 0;
+
+    padding: 8px 4px;
+  }
+
+  .user-info {
+    display: flex;
+  }
+
+  .logout-button {
+    width: 100%;
+    height: 46px;
+
+    margin: 4px 0 0;
+
+    justify-content: center;
+  }
+}

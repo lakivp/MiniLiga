@@ -1,0 +1,1342 @@
+<div class="admin-page">
+  <div class="page-container">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header class="page-header">
+
+      <div class="header-content">
+
+        <div class="header-icon">
+          <i class="fa-solid fa-people-group"></i>
+        </div>
+
+        <div class="header-text">
+
+          <span class="eyebrow">
+            ADMINISTRACIJA TAKMIČENJA
+          </span>
+
+          <h1>
+            {{ getGroupName() }}
+          </h1>
+
+          <p>
+            {{ getPhaseName() }} · Upravljanje grupom
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="header-actions">
+
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="goBackToCompetition()"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+
+          <span>
+            Nazad na takmičenje
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="openAddTeam()"
+          [disabled]="loading || saving"
+        >
+          <i class="fa-solid fa-plus"></i>
+
+          <span>
+            Dodaj tim
+          </span>
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         ALERTS
+         ===================================================== -->
+
+    <div
+      class="alert alert-success"
+      *ngIf="success"
+    >
+
+      <i class="fa-solid fa-circle-check"></i>
+
+      <span>
+        {{ success }}
+      </span>
+
+      <button
+        type="button"
+        (click)="success = ''"
+        aria-label="Zatvori"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+
+    <div
+      class="alert alert-error"
+      *ngIf="error"
+    >
+
+      <i class="fa-solid fa-circle-exclamation"></i>
+
+      <span>
+        {{ error }}
+      </span>
+
+      <button
+        type="button"
+        (click)="error = ''"
+        aria-label="Zatvori"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         LOADING
+         ===================================================== -->
+
+    <div
+      class="loading-state"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>
+        Učitavanje podataka grupe...
+      </p>
+
+    </div>
+
+
+    <ng-container
+      *ngIf="!loading && group"
+    >
+
+
+      <!-- =====================================================
+           SUMMARY
+           ===================================================== -->
+
+      <section class="summary-grid">
+
+        <article class="summary-card">
+
+          <div class="summary-icon purple">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+
+          <div>
+
+            <span class="summary-label">
+              Broj timova
+            </span>
+
+            <strong>
+              {{ teams.length }}
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="summary-card">
+
+          <div class="summary-icon blue">
+            <i class="fa-solid fa-futbol"></i>
+          </div>
+
+          <div>
+
+            <span class="summary-label">
+              Utakmice
+            </span>
+
+            <strong>
+              {{ matches.length }}
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="summary-card">
+
+          <div class="summary-icon green">
+            <i class="fa-solid fa-table-list"></i>
+          </div>
+
+          <div>
+
+            <span class="summary-label">
+              Tabela
+            </span>
+
+            <strong>
+              {{ standings.length }} timova
+            </strong>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+
+      <!-- =====================================================
+           TEAMS
+           ===================================================== -->
+
+      <section class="content-card">
+
+        <div class="section-header">
+
+          <div>
+
+            <h2>
+
+              <i class="fa-solid fa-users"></i>
+
+              Timovi u grupi
+
+            </h2>
+
+            <p>
+              Upravljajte učesnicima i njihovim seed pozicijama.
+            </p>
+
+          </div>
+
+          <span class="count-badge">
+            {{ teams.length }} timova
+          </span>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+          class="empty-state"
+          *ngIf="teams.length === 0"
+        >
+
+          <div class="empty-icon">
+            <i class="fa-solid fa-users-slash"></i>
+          </div>
+
+          <h3>
+            Nema timova u grupi
+          </h3>
+
+          <p>
+            Dodajte timove kako biste formirali grupu.
+          </p>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="openAddTeam()"
+          >
+
+            <i class="fa-solid fa-plus"></i>
+
+            Dodaj prvi tim
+
+          </button>
+
+        </div>
+
+
+        <!-- TEAM LIST -->
+
+        <div
+          class="teams-list"
+          *ngIf="teams.length > 0"
+        >
+
+          <!-- HEADER -->
+
+          <div class="team-row team-row-header">
+
+            <span class="column-team">
+              Tim
+            </span>
+
+            <span class="column-seed">
+              Seed
+            </span>
+
+            <span class="column-actions">
+              Akcije
+            </span>
+
+          </div>
+
+
+          <!-- TEAMS -->
+
+          <div
+            class="team-row"
+            *ngFor="let team of teams"
+          >
+
+            <!-- TEAM -->
+
+            <div class="column-team team-info">
+
+              <img
+                *ngIf="team.logoUrl"
+                [src]="team.logoUrl"
+                [alt]="team.teamName"
+                class="team-logo"
+              />
+
+              <div
+                class="team-logo team-logo-placeholder"
+                *ngIf="!team.logoUrl"
+              >
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+
+              <div class="team-details">
+
+                <strong>
+                  {{ team.teamName }}
+                </strong>
+
+                <small
+                  *ngIf="team.shortName"
+                >
+                  {{ team.shortName }}
+                </small>
+
+              </div>
+
+            </div>
+
+
+            <!-- SEED -->
+
+            <div class="column-seed seed-cell">
+
+              <div class="seed-control">
+
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  [ngModel]="team.seed"
+                  (ngModelChange)="
+                    team.seed =
+                      $event === null || $event === ''
+                        ? null
+                        : +$event
+                  "
+                  (blur)="updateSeed(team)"
+                  [disabled]="saving"
+                  aria-label="Seed pozicija"
+                />
+
+                <div class="seed-stepper">
+
+                  <button
+                    type="button"
+                    (click)="adjustSeed(team, 1)"
+                    [disabled]="saving"
+                    aria-label="Povećaj seed"
+                  >
+                    <i class="fa-solid fa-chevron-up"></i>
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="adjustSeed(team, -1)"
+                    [disabled]="saving"
+                    aria-label="Smanji seed"
+                  >
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="column-actions row-actions">
+
+              <button
+                type="button"
+                class="icon-button danger"
+                title="Ukloni tim iz grupe"
+                (click)="removeTeam(team)"
+                [disabled]="saving"
+              >
+
+                <i class="fa-solid fa-trash-can"></i>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <div
+          class="card-footer"
+          *ngIf="teams.length > 0"
+        >
+
+          <span>
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            Promena seeda čuva se nakon izlaska iz polja.
+
+          </span>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =====================================================
+           STANDINGS
+           ===================================================== -->
+
+      <section class="content-card standings-card">
+
+        <div class="section-header">
+
+          <div>
+
+            <h2>
+
+              <i class="fa-solid fa-ranking-star"></i>
+
+              Tabela grupe
+
+            </h2>
+
+            <p>
+              Trenutni plasman na osnovu rezultata utakmica.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div
+          class="loading-inline"
+          *ngIf="standingsLoading"
+        >
+
+          <div class="spinner spinner-small"></div>
+
+          <span>
+            Učitavanje tabele...
+          </span>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+          class="empty-state compact"
+          *ngIf="
+            !standingsLoading &&
+            standings.length === 0
+          "
+        >
+
+          <i class="fa-solid fa-table-list"></i>
+
+          <p>
+            Tabela će biti prikazana kada budu dostupni podaci.
+          </p>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div
+          class="table-preview"
+          *ngIf="
+            !standingsLoading &&
+            standings.length > 0
+          "
+        >
+
+          <table class="standings-table">
+
+            <thead>
+
+              <tr>
+
+                <th class="position-col">
+                  #
+                </th>
+
+                <th class="club-col">
+                  Klub
+                </th>
+
+                <th>
+                  U
+                </th>
+
+                <th>
+                  P
+                </th>
+
+                <th>
+                  N
+                </th>
+
+                <th>
+                  I
+                </th>
+
+                <th>
+                  DG
+                </th>
+
+                <th>
+                  PG
+                </th>
+
+                <th class="points-col">
+                  BOD
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr
+                *ngFor="
+                  let item of standings;
+                  let i = index
+                "
+              >
+
+                <td class="position-col">
+
+                  <span
+                    class="position-badge"
+                    [class.top-position]="i < 3"
+                  >
+                    {{ item.position }}
+                  </span>
+
+                </td>
+
+
+                <td class="club-col">
+
+                  <div class="standing-team">
+
+                    <img
+                      *ngIf="item.logoUrl"
+                      [src]="item.logoUrl"
+                      [alt]="item.teamName"
+                    />
+
+                    <span
+                      class="standing-logo-placeholder"
+                      *ngIf="!item.logoUrl"
+                    >
+                      <i class="fa-solid fa-shield-halved"></i>
+                    </span>
+
+                    <strong>
+                      {{ item.teamName }}
+                    </strong>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+                  {{ item.played }}
+                </td>
+
+                <td>
+                  {{ item.wins }}
+                </td>
+
+                <td>
+                  {{ item.draws }}
+                </td>
+
+                <td>
+                  {{ item.losses }}
+                </td>
+
+                <td>
+                  {{ item.goalsFor }}
+                </td>
+
+                <td>
+                  {{ item.goalsAgainst }}
+                </td>
+
+                <td class="points-col">
+
+                  <strong>
+                    {{ item.points }}
+                  </strong>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =====================================================
+           MATCHES
+           ===================================================== -->
+
+      <section class="content-card matches-card">
+
+        <div class="section-header">
+
+          <div>
+
+            <span class="eyebrow">
+              RASPORED
+            </span>
+
+            <h2>
+              Utakmice grupe
+            </h2>
+
+            <p>
+              Sve utakmice koje pripadaju ovoj grupi.
+            </p>
+
+          </div>
+
+
+          <div class="matches-header-actions">
+
+            <label
+              class="round-filter"
+              *ngIf="matchRounds.length > 0"
+            >
+
+              <i class="fa-solid fa-filter"></i>
+
+              <select
+                [(ngModel)]="selectedRound"
+                aria-label="Filtriraj utakmice po kolu"
+              >
+                <option
+                  *ngFor="let round of matchRounds"
+                  [ngValue]="round"
+                >
+                  Kolo {{ round }}
+                </option>
+              </select>
+
+            </label>
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="createMatch()"
+            >
+
+              <i class="fa-solid fa-plus"></i>
+
+              <span>
+                Nova utakmica
+              </span>
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div
+          class="matches-loading"
+          *ngIf="matchesLoading"
+        >
+
+          <div class="loading-spinner"></div>
+
+          <span>
+            Učitavanje utakmica...
+          </span>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+          class="matches-empty"
+          *ngIf="
+            !matchesLoading &&
+            filteredMatches.length === 0
+          "
+        >
+
+          <div class="empty-icon">
+            <i class="fa-solid fa-calendar-xmark"></i>
+          </div>
+
+          <h3>
+            Nema utakmica
+          </h3>
+
+          <p>
+            Za ovu grupu još nije kreirana nijedna utakmica.
+          </p>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="createMatch()"
+          >
+
+            <i class="fa-solid fa-plus"></i>
+
+            Dodaj prvu utakmicu
+
+          </button>
+
+        </div>
+
+
+        <!-- MATCHES -->
+
+        <div
+          class="matches-list"
+          *ngIf="
+            !matchesLoading &&
+            filteredMatches.length > 0
+          "
+        >
+
+          <article
+            class="match-card"
+            *ngFor="let match of filteredMatches"
+            (click)="openMatch(match.id)"
+            tabindex="0"
+            role="button"
+          >
+
+
+            <!-- DATE -->
+
+            <div class="match-date">
+
+              <strong>
+                {{ formatMatchDate(match.matchDate) }}
+              </strong>
+
+              <span>
+                {{ formatMatchTime(match.matchDate) }}
+              </span>
+
+            </div>
+
+
+            <!-- TEAMS -->
+
+            <div class="match-teams">
+
+
+              <!-- HOME -->
+
+              <div class="match-team home">
+
+                <div class="team-info">
+
+                  <span>
+                    {{ match.homeTeam?.name ?? 'TBD' }}
+                  </span>
+
+                  <img
+                    *ngIf="match.homeTeam?.logoUrl"
+                    [src]="match.homeTeam?.logoUrl"
+                    [alt]="match.homeTeam?.name"
+                  />
+
+                  <div
+                    class="team-logo-placeholder"
+                    *ngIf="!match.homeTeam?.logoUrl"
+                  >
+                    <i class="fa-solid fa-shield"></i>
+                  </div>
+
+                </div>
+
+
+                <strong
+                  class="score"
+                  *ngIf="hasMatchStarted(match)"
+                >
+                  {{ match.homeScore }}
+                </strong>
+
+              </div>
+
+
+              <!-- VS -->
+
+              <div class="match-separator">
+                {{ hasMatchStarted(match) ? ':' : 'VS' }}
+              </div>
+
+
+              <!-- AWAY -->
+
+              <div class="match-team away">
+
+                <strong
+                  class="score"
+                  *ngIf="hasMatchStarted(match)"
+                >
+                  {{ match.awayScore }}
+                </strong>
+
+                <div class="team-info">
+
+                  <img
+                    *ngIf="match.awayTeam?.logoUrl"
+                    [src]="match.awayTeam?.logoUrl"
+                    [alt]="match.awayTeam?.name"
+                  />
+
+                  <div
+                    class="team-logo-placeholder"
+                    *ngIf="!match.awayTeam?.logoUrl"
+                  >
+                    <i class="fa-solid fa-shield"></i>
+                  </div>
+
+                  <span>
+                    {{ match.awayTeam?.name ?? 'TBD' }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- META -->
+
+            <div class="match-meta">
+
+              <span
+                *ngIf="match.round !== null"
+                class="round-badge"
+              >
+                Kolo {{ match.round }}
+              </span>
+
+
+              <span
+                class="status-badge"
+                [ngClass]="
+                  getMatchStatusClass(match.status)
+                "
+              >
+
+                <span class="status-dot"></span>
+
+                {{ getMatchStatusText(match.status) }}
+
+              </span>
+
+
+              <span
+                *ngIf="match.location"
+                class="location"
+              >
+
+                <i class="fa-solid fa-location-dot"></i>
+
+                {{ match.location }}
+
+              </span>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="match-actions">
+
+              <button
+                *ngIf="canDeleteMatch(match)"
+                type="button"
+                class="match-delete-button"
+                title="Obriši zakazanu utakmicu"
+                aria-label="Obriši zakazanu utakmicu"
+                [disabled]="deletingMatch"
+                (click)="requestDeleteMatch($event, match)"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+
+              <div class="match-arrow" aria-hidden="true">
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+    </ng-container>
+
+  </div>
+</div>
+
+
+<!-- =========================================================
+     DELETE SCHEDULED MATCH MODAL
+     ========================================================= -->
+
+<div
+  class="modal-overlay confirmation-overlay"
+  *ngIf="matchToDelete"
+  (click)="cancelDeleteMatch()"
+>
+
+  <section
+    class="modal-card confirmation-modal delete-match-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-match-title"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="confirmation-icon danger-icon">
+      <i class="fa-solid fa-trash-can"></i>
+    </div>
+
+    <h2 id="delete-match-title">Brisanje utakmice</h2>
+
+    <p>
+      Da li ste sigurni da želite da obrišete zakazanu utakmicu
+      <strong>
+        {{ matchToDelete.homeTeam?.name ?? 'TBD' }} –
+        {{ matchToDelete.awayTeam?.name ?? 'TBD' }}
+      </strong>?
+    </p>
+
+    <div class="confirmation-note delete-match-note">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>Brisanje zakazane utakmice je trajna akcija.</span>
+    </div>
+
+    <div class="modal-footer confirmation-actions">
+
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="cancelDeleteMatch()"
+        [disabled]="deletingMatch"
+      >
+        Odustani
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="confirmDeleteMatch()"
+        [disabled]="deletingMatch"
+      >
+        <i
+          class="fa-solid"
+          [class.fa-spinner]="deletingMatch"
+          [class.fa-spin]="deletingMatch"
+          [class.fa-trash-can]="!deletingMatch"
+        ></i>
+        {{ deletingMatch ? 'Brisanje...' : 'Obriši utakmicu' }}
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+
+<!-- =========================================================
+     ADD TEAM MODAL
+     ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="showAddTeamForm"
+  (click)="cancelAddTeam()"
+>
+
+  <section
+    class="modal-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="add-team-title"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="modal-header">
+
+      <div class="modal-heading">
+
+        <div class="modal-icon">
+          <i class="fa-solid fa-user-plus"></i>
+        </div>
+
+        <div>
+
+          <h2 id="add-team-title">
+            Dodavanje tima
+          </h2>
+
+          <p>
+            Izaberite tim i definišite seed poziciju.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="modal-close"
+        (click)="cancelAddTeam()"
+        aria-label="Zatvori"
+      >
+
+        <i class="fa-solid fa-xmark"></i>
+
+      </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <!-- TEAM -->
+
+      <div class="form-group">
+
+        <label for="team-select">
+          Tim <span>*</span>
+        </label>
+
+        <div class="select-wrapper">
+
+          <i
+            class="fa-solid fa-shield-halved input-icon"
+          ></i>
+
+          <select
+            id="team-select"
+            [(ngModel)]="selectedTeamId"
+            [disabled]="saving"
+          >
+
+            <option [ngValue]="null">
+              Izaberite tim
+            </option>
+
+            <option
+              *ngFor="
+                let team of getAvailableTeams()
+              "
+              [ngValue]="team.id"
+            >
+              {{ team.name }}
+            </option>
+
+          </select>
+
+          <i
+            class="fa-solid fa-chevron-down select-arrow"
+          ></i>
+
+        </div>
+
+        <small
+          *ngIf="getAvailableTeams().length === 0"
+        >
+          Nema dostupnih aktivnih timova za dodavanje.
+        </small>
+
+      </div>
+
+
+      <!-- SEED -->
+
+      <div class="form-group">
+
+        <label for="selected-seed">
+          Seed pozicija
+        </label>
+
+        <div class="seed-control selected-seed-control">
+
+          <input
+            id="selected-seed"
+            type="number"
+            min="1"
+            step="1"
+            [(ngModel)]="selectedSeed"
+            placeholder="Automatski / nije definisan"
+            [disabled]="saving"
+          />
+
+          <div class="seed-stepper">
+
+            <button
+              type="button"
+              (click)="adjustSelectedSeed(1)"
+              [disabled]="saving"
+              aria-label="Povećaj seed"
+            >
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
+
+            <button
+              type="button"
+              (click)="adjustSelectedSeed(-1)"
+              [disabled]="saving"
+              aria-label="Smanji seed"
+            >
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+
+          </div>
+
+        </div>
+
+        <small>
+          Seed nije obavezan. Ako ga ne unesete,
+          ostaje nedefinisan.
+        </small>
+
+      </div>
+
+
+      <!-- SELECTED TEAM -->
+
+      <div
+        class="selected-team-preview"
+        *ngIf="selectedTeamId"
+      >
+
+        <i class="fa-solid fa-circle-check"></i>
+
+        <div>
+
+          <span>
+            Izabrani tim
+          </span>
+
+          <strong>
+            {{ getSelectedTeamName() }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="modal-footer">
+
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="cancelAddTeam()"
+        [disabled]="saving"
+      >
+        Otkaži
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="addTeam()"
+        [disabled]="saving || !selectedTeamId"
+      >
+
+        <i
+          class="fa-solid"
+          [class.fa-spinner]="saving"
+          [class.fa-spin]="saving"
+          [class.fa-plus]="!saving"
+        ></i>
+
+        {{ saving ? 'Dodavanje...' : 'Dodaj tim' }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+
+<!-- =========================================================
+     REMOVE TEAM MODAL
+     ========================================================= -->
+
+<div
+  class="modal-overlay confirmation-overlay"
+  *ngIf="teamToRemove"
+  (click)="cancelRemoveTeam()"
+>
+
+  <section
+    class="modal-card confirmation-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="remove-team-title"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="confirmation-icon">
+
+      <i class="fa-solid fa-trash-can"></i>
+
+    </div>
+
+
+    <h2 id="remove-team-title">
+      Uklanjanje tima
+    </h2>
+
+
+    <p>
+
+      Da li ste sigurni da želite da uklonite tim
+
+      <strong>
+        {{ teamToRemove.teamName }}
+      </strong>
+
+      iz ove grupe?
+
+    </p>
+
+
+    <div class="confirmation-note">
+
+      <i class="fa-solid fa-circle-info"></i>
+
+      <span>
+        Ova akcija uklanja tim iz grupe.
+      </span>
+
+    </div>
+
+
+    <div class="modal-footer confirmation-actions">
+
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="cancelRemoveTeam()"
+        [disabled]="saving"
+      >
+        Odustani
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="confirmRemoveTeam()"
+        [disabled]="saving"
+      >
+
+        <i
+          class="fa-solid"
+          [class.fa-spinner]="saving"
+          [class.fa-spin]="saving"
+          [class.fa-trash-can]="!saving"
+        ></i>
+
+        {{ saving ? 'Uklanjanje...' : 'Ukloni tim' }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+</div>

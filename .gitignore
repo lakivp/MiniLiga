@@ -1,0 +1,35 @@
+
+# Windows and IDE
+.DS_Store
+Thumbs.db
+.vs/
+.idea/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+secrets.json
+*.pfx
+*.p12
+*.key
+*.pem
+
+# Angular
+front/node_modules/
+front/dist/
+front/.angular/
+front/coverage/
+
+# .NET
+bek/bin/
+bek/obj/
+bek/TestResults/
+
+# Logs and local databases
+*.log
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.dump

@@ -1,0 +1,393 @@
+<main class="competitions-page">
+
+  <header class="page-header">
+    <div class="breadcrumb">
+      <span>ADMIN</span>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span>TAKMIČENJA</span>
+    </div>
+
+    <div class="heading-main">
+      <div class="heading-row">
+        <div class="heading-icon">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+        <div>
+          <span class="eyebrow">UPRAVLJANJE LIGOM</span>
+          <h1>Takmičenja</h1>
+          <p>Pregledaj takmičenja i otvori njihovu strukturu.</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="add-competition-button"
+        (click)="openCreateForm()"
+      >
+        <i class="fa-solid fa-plus"></i>
+        Dodaj takmičenje
+      </button>
+    </div>
+  </header>
+
+  <section class="overview" aria-label="Pregled takmičenja">
+    <div class="overview-item">
+      <span class="overview-icon total"><i class="fa-solid fa-trophy"></i></span>
+      <span class="overview-label">Ukupno takmičenja</span>
+      <strong>{{ competitions.length }}</strong>
+    </div>
+    <div class="overview-item">
+      <span class="overview-icon active"><i class="fa-solid fa-circle-check"></i></span>
+      <span class="overview-label">Aktivna</span>
+      <strong>{{ activeCount }}</strong>
+    </div>
+    <div class="overview-item">
+      <span class="overview-icon inactive"><i class="fa-solid fa-box-archive"></i></span>
+      <span class="overview-label">Arhivirana</span>
+      <strong>{{ inactiveCount }}</strong>
+    </div>
+  </section>
+
+  <div class="success-banner" *ngIf="success" role="status">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>{{ success }}</span>
+    <button type="button" aria-label="Zatvori poruku" (click)="success = ''">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <div class="action-error-banner" *ngIf="actionError" role="alert">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <span>{{ actionError }}</span>
+    <button type="button" aria-label="Zatvori poruku" (click)="actionError = ''">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <section class="competition-panel">
+    <div class="panel-heading">
+      <div>
+        <span class="section-label">TAKMIČARSKA STRUKTURA</span>
+        <h2>Sva takmičenja</h2>
+      </div>
+      <span class="result-count">{{ filteredCompetitions.length }} prikazano</span>
+    </div>
+
+    <div class="filters">
+      <label class="search-control">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="search"
+          [(ngModel)]="searchTerm"
+          placeholder="Pretraži takmičenje ili sezonu..."
+          aria-label="Pretraži takmičenja"
+        >
+      </label>
+
+      <label class="status-control">
+        <i class="fa-solid fa-filter"></i>
+        <select [(ngModel)]="selectedStatus" aria-label="Filtriraj po statusu">
+          <option value="all">Svi statusi</option>
+          <option value="active">Aktivna</option>
+          <option value="inactive">Arhivirana</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <span class="spinner"></span>
+      <span>Učitavanje takmičenja...</span>
+    </div>
+
+    <div class="error-state" *ngIf="!loading && error">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <p>{{ error }}</p>
+      <button type="button" (click)="loadCompetitions()">Pokušaj ponovo</button>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && !error && filteredCompetitions.length === 0">
+      <span class="empty-icon"><i class="fa-solid fa-trophy"></i></span>
+      <h3>{{ competitions.length ? 'Nema rezultata' : 'Nema takmičenja' }}</h3>
+      <p>{{ competitions.length ? 'Promeni pretragu ili izabrani status.' : 'Takmičenja će se pojaviti ovde kada budu kreirana.' }}</p>
+      <button
+        type="button"
+        class="clear-filters"
+        *ngIf="competitions.length"
+        (click)="clearFilters()"
+      >
+        Očisti filtere
+      </button>
+    </div>
+
+    <div class="competition-list" *ngIf="!loading && !error && filteredCompetitions.length > 0">
+      <article class="competition-row" *ngFor="let competition of filteredCompetitions">
+        <div class="competition-mark">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+
+        <div class="competition-info">
+          <div class="competition-title-row">
+            <h3>{{ competition.name }}</h3>
+            <span class="status-badge" [class.inactive]="!competition.isActive">
+              <span class="status-dot"></span>
+              {{ competition.isActive ? 'Aktivno' : 'Arhivirano' }}
+            </span>
+          </div>
+          <div class="competition-meta">
+            <span><i class="fa-regular fa-calendar"></i>{{ competition.seasonName }}</span>
+            <span *ngIf="competition.description">{{ competition.description }}</span>
+          </div>
+        </div>
+
+        <div class="competition-actions">
+          <a
+            class="manage-button"
+            [routerLink]="['/admin/takmicenje', competition.id]"
+          >
+            <i class="fa-solid fa-gear"></i>
+            <span>Upravljaj</span>
+            <i class="fa-solid fa-arrow-right manage-arrow"></i>
+          </a>
+
+          <button
+            type="button"
+            class="row-action archive-action"
+            [disabled]="savingArchiveId !== null"
+            [attr.aria-label]="competition.isActive ? 'Arhiviraj takmičenje' : 'Aktiviraj takmičenje'"
+            [title]="competition.isActive ? 'Arhiviraj takmičenje' : 'Ponovo aktiviraj takmičenje'"
+            (click)="toggleArchive(competition)"
+          >
+            <i class="fa-solid" [class.fa-box-archive]="competition.isActive" [class.fa-rotate-left]="!competition.isActive"></i>
+          </button>
+
+          <button
+            type="button"
+            class="row-action delete-action"
+            [disabled]="deletingCompetition"
+            aria-label="Obriši takmičenje"
+            title="Obriši takmičenje i povezane podatke"
+            (click)="openDeleteConfirmation(competition)"
+          >
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<div
+  class="competition-modal-backdrop"
+  *ngIf="showCreateForm"
+  (click)="closeCreateForm()"
+>
+  <section
+    class="competition-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="create-competition-title"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="competition-modal-header">
+      <div>
+        <span class="section-label">NOVO TAKMIČENJE</span>
+        <h2 id="create-competition-title">Dodaj takmičenje</h2>
+      </div>
+      <button
+        type="button"
+        class="modal-close"
+        aria-label="Zatvori"
+        [disabled]="saving"
+        (click)="closeCreateForm()"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </header>
+
+    <div class="competition-modal-body">
+      <div class="form-error" *ngIf="formError" role="alert">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>{{ formError }}</span>
+      </div>
+
+      <div class="season-mode-switch" role="group" aria-label="Izbor sezone">
+        <button
+          type="button"
+          [class.selected]="createNewSeason"
+          [disabled]="saving"
+          (click)="selectSeasonMode(true)"
+        >
+          Nova sezona
+        </button>
+        <button
+          type="button"
+          [class.selected]="!createNewSeason"
+          [disabled]="saving"
+          (click)="selectSeasonMode(false)"
+        >
+          Postojeća sezona
+        </button>
+      </div>
+
+      <label class="form-field">
+        <span>Naziv takmičenja <b>*</b></span>
+        <input
+          type="text"
+          [(ngModel)]="competitionForm.name"
+          placeholder="npr. Intertoto liga"
+          maxlength="150"
+          [disabled]="saving"
+        >
+      </label>
+
+      <ng-container *ngIf="!createNewSeason; else createSeasonFields">
+        <label class="form-field">
+          <span>Sezona <b>*</b></span>
+          <select
+            [(ngModel)]="competitionForm.seasonId"
+            [disabled]="loadingSeasons || seasons.length === 0 || saving"
+          >
+            <option [ngValue]="null">
+              {{ loadingSeasons ? 'Učitavanje sezona...' : 'Izaberi sezonu' }}
+            </option>
+            <option *ngFor="let season of seasons" [ngValue]="season.id">
+              {{ season.name }}
+            </option>
+          </select>
+          <small class="field-hint" *ngIf="!loadingSeasons && seasons.length === 0">
+            Nema kreiranih sezona. Izaberi „Nova sezona“.
+          </small>
+        </label>
+      </ng-container>
+
+      <ng-template #createSeasonFields>
+        <div class="new-season-fields">
+          <label class="form-field full-field">
+            <span>Naziv sezone <b>*</b></span>
+            <input
+              type="text"
+              [(ngModel)]="seasonForm.name"
+              placeholder="npr. Sezona 12"
+              maxlength="100"
+              [disabled]="saving"
+            >
+          </label>
+
+          <label class="form-field">
+            <span>Početak sezone <b>*</b></span>
+
+            <div class="date-input-wrapper">
+              <input
+                #seasonStartDate
+                type="date"
+                [(ngModel)]="seasonForm.startDate"
+                [disabled]="saving"
+              >
+
+              <button
+                type="button"
+                class="date-picker-button"
+                aria-label="Otvori kalendar"
+                [disabled]="saving"
+                (click)="seasonStartDate.showPicker()"
+              >
+                <i class="fa-regular fa-calendar"></i>
+              </button>
+            </div>
+          </label>
+        </div>
+      </ng-template>
+
+      <label class="form-field">
+        <span>Opis</span>
+        <textarea
+          [(ngModel)]="competitionForm.description"
+          rows="3"
+          placeholder="Kratak opis takmičenja..."
+          [disabled]="saving"
+        ></textarea>
+      </label>
+
+      <label class="active-toggle">
+        <span class="active-toggle-copy">
+          <strong>Aktivno takmičenje</strong>
+          <small>Takmičenje će biti označeno kao aktivno.</small>
+        </span>
+        <input
+          type="checkbox"
+          [(ngModel)]="competitionForm.isActive"
+          [disabled]="saving"
+        >
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+
+    <footer class="competition-modal-actions">
+      <button
+        type="button"
+        class="cancel-button"
+        [disabled]="saving"
+        (click)="closeCreateForm()"
+      >
+        Otkaži
+      </button>
+      <button
+        type="button"
+        class="save-button"
+        [disabled]="saving || loadingSeasons || (!createNewSeason && seasons.length === 0)"
+        (click)="createCompetition()"
+      >
+        <span class="save-spinner" *ngIf="saving"></span>
+        <i class="fa-solid fa-check" *ngIf="!saving"></i>
+        {{ saving ? 'Čuvanje...' : 'Sačuvaj takmičenje' }}
+      </button>
+    </footer>
+  </section>
+</div>
+
+<div
+  class="competition-modal-backdrop delete-competition-backdrop"
+  *ngIf="competitionToDelete as competition"
+  (click)="closeDeleteConfirmation()"
+>
+  <section
+    class="competition-modal delete-competition-modal"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="delete-competition-title"
+    aria-describedby="delete-competition-message"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="delete-confirm-content">
+      <span class="delete-confirm-icon"><i class="fa-solid fa-trash-can"></i></span>
+      <span class="section-label danger-label">POTVRDA BRISANJA</span>
+      <h2 id="delete-competition-title">Obrisati takmičenje?</h2>
+      <p id="delete-competition-message">
+        Brisanjem takmičenja <strong>{{ competition.name }}</strong> ukloniće se sve povezane faze, grupe, utakmice, zapisnici i članstva timova.
+      </p>
+      <p class="delete-keep-teams">Sezona i sami timovi ostaju sačuvani u sistemu.</p>
+    </div>
+
+    <footer class="competition-modal-actions">
+      <button
+        type="button"
+        class="cancel-button"
+        [disabled]="deletingCompetition"
+        (click)="closeDeleteConfirmation()"
+      >
+        Otkaži
+      </button>
+      <button
+        type="button"
+        class="delete-confirm-button"
+        [disabled]="deletingCompetition"
+        (click)="confirmDeleteCompetition()"
+      >
+        <span class="save-spinner" *ngIf="deletingCompetition"></span>
+        <i class="fa-solid fa-trash-can" *ngIf="!deletingCompetition"></i>
+        {{ deletingCompetition ? 'Brisanje...' : 'Obriši takmičenje' }}
+      </button>
+    </footer>
+  </section>
+</div>

@@ -1,0 +1,1013 @@
+<div class="results-page">
+
+  <!-- ===================================================== -->
+  <!-- HERO -->
+  <!-- ===================================================== -->
+
+  <section class="results-hero">
+    <div class="hero-decoration hero-decoration-one"></div>
+    <div class="hero-decoration hero-decoration-two"></div>
+
+    <div class="results-container">
+      <div class="hero-content">
+        <span class="hero-kicker">INTERTOTO</span>
+
+        <h1>
+          Rezultati
+          <span>utakmica.</span>
+        </h1>
+
+        <p>
+          Pregled utakmica uživo i završenih utakmica po
+          takmičenju, fazama i kolima.
+        </p>
+      </div>
+
+      <div class="hero-ball">
+        <i class="fa-solid fa-futbol"></i>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- MAIN -->
+  <!-- ===================================================== -->
+
+  <main class="results-main">
+
+    <div class="results-container">
+
+
+      <!-- ================================================= -->
+      <!-- PROFESSIONAL FILTER PANEL -->
+      <!-- ================================================= -->
+
+      <section class="competition-filter">
+
+        <!-- FILTER HEADER -->
+
+        <div class="filter-top">
+
+          <div class="filter-title-area">
+
+            <div class="filter-title-icon">
+              <i class="fa-solid fa-sliders"></i>
+            </div>
+
+            <div>
+              <span class="section-kicker">
+                PODEŠAVANJE PRIKAZA
+              </span>
+
+              <h2>
+                Filteri
+                <span>rezultata.</span>
+              </h2>
+
+              <p>
+                Odaberite takmičenje, fazu i kolo koje želite
+                da pregledate.
+              </p>
+            </div>
+
+          </div>
+
+
+          <!-- RESET -->
+
+          <button
+            type="button"
+            class="reset-filters-button"
+            (click)="resetFilters()"
+            [disabled]="loadingCompetitions || !selectedCompetitionId"
+          >
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Resetuj</span>
+          </button>
+
+        </div>
+
+
+        <!-- DIVIDER -->
+
+        <div class="filter-divider"></div>
+
+
+        <!-- FILTER CONTROLS -->
+
+        <div class="filter-controls">
+
+
+          <!-- ============================================= -->
+          <!-- COMPETITION -->
+          <!-- ============================================= -->
+
+          <div class="filter-control filter-control-main">
+
+            <div class="filter-control-header">
+
+              <div class="filter-step active">
+                <span>01</span>
+              </div>
+
+              <div class="filter-control-heading">
+
+                <span class="filter-control-kicker">
+                  GLAVNI FILTER
+                </span>
+
+                <strong>
+                  Takmičenje
+                </strong>
+
+              </div>
+
+
+            </div>
+
+
+            <div
+              class="professional-select"
+              *ngIf="!loadingCompetitions"
+              (click)="openFilterOptions($event, 'competition')"
+            >
+
+              <div class="professional-select-icon">
+                <i class="fa-solid fa-trophy"></i>
+              </div>
+
+              <div class="professional-select-content">
+
+                <span class="professional-select-label">
+                  Izabrano takmičenje
+                </span>
+
+                <select
+                  id="competition"
+                  [(ngModel)]="selectedCompetitionId"
+                  (change)="onCompetitionChange()"
+                >
+                  <option
+                    *ngFor="
+                      let competition of competitions;
+                      trackBy: trackByCompetition
+                    "
+                    [ngValue]="competition.id"
+                  >
+                    {{ competition.name }}
+                  </option>
+                </select>
+
+              </div>
+
+              <i class="fa-solid fa-chevron-down professional-select-arrow"></i>
+
+            </div>
+
+
+            <div
+              class="filter-skeleton"
+              *ngIf="loadingCompetitions"
+            ></div>
+
+
+            <div
+              class="filter-control-footer"
+              *ngIf="competitions.length > 0 && !loadingCompetitions"
+            >
+              <span>
+                <i class="fa-solid fa-trophy"></i>
+                {{ competitions.length }}
+                {{
+                  competitions.length === 1
+                    ? 'takmičenje dostupno'
+                    : 'takmičenja dostupna'
+                }}
+              </span>
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- PHASE -->
+          <!-- ============================================= -->
+
+          <div
+            class="filter-control"
+            *ngIf="
+              !loadingResults &&
+              results &&
+              results.phases.length > 0
+            "
+          >
+
+            <div class="filter-control-header">
+
+              <div
+                class="filter-step"
+                [class.active]="selectedPhase"
+              >
+                <span>02</span>
+              </div>
+
+              <div class="filter-control-heading">
+
+                <span class="filter-control-kicker">
+                  STRUKTURA
+                </span>
+
+                <strong>
+                  Faza
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="professional-select"
+              (click)="openFilterOptions($event, 'phase')"
+            >
+
+              <div class="professional-select-icon">
+                <i class="fa-solid fa-layer-group"></i>
+              </div>
+
+              <div class="professional-select-content">
+
+                <span class="professional-select-label">
+                  Izabrana faza
+                </span>
+
+                <select
+                  id="phase"
+                  [(ngModel)]="selectedPhaseId"
+                  (change)="onPhaseChange()"
+                >
+
+                  <option
+                    *ngFor="
+                      let phase of results.phases;
+                      trackBy: trackByPhase
+                    "
+                    [ngValue]="phase.id"
+                  >
+                    {{ phase.name }}
+                  </option>
+
+                </select>
+
+              </div>
+
+              <i class="fa-solid fa-chevron-down professional-select-arrow"></i>
+
+            </div>
+
+
+            <div
+              class="filter-control-footer"
+              *ngIf="selectedPhase"
+            >
+              <span>
+                <i class="fa-solid fa-diagram-project"></i>
+                {{ getPhaseTypeLabel(selectedPhase) }}
+              </span>
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- ROUND -->
+          <!-- ============================================= -->
+
+          <div
+            class="filter-control"
+            *ngIf="
+              !loadingResults &&
+              results &&
+              results.phases.length > 0 &&
+              selectedPhase &&
+              phaseHasRounds(selectedPhase)
+            "
+          >
+
+            <div class="filter-control-header">
+
+              <div class="filter-step active">
+                <span>03</span>
+              </div>
+
+              <div class="filter-control-heading">
+
+                <span class="filter-control-kicker">
+                  TAKMIČENJE
+                </span>
+
+                <strong>
+                  Kolo
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="professional-select"
+              (click)="openFilterOptions($event, 'round')"
+            >
+
+              <div class="professional-select-icon">
+                <i class="fa-solid fa-list-ol"></i>
+              </div>
+
+              <div class="professional-select-content">
+
+                <span class="professional-select-label">
+                  Izabrano kolo
+                </span>
+
+                <select
+                  id="round"
+                  [(ngModel)]="selectedRound"
+                >
+
+                  <option
+                    *ngFor="
+                      let round of selectedPhase.rounds
+                    "
+                    [ngValue]="round"
+                  >
+                    {{ round }}. kolo
+                  </option>
+
+                </select>
+
+              </div>
+
+              <i class="fa-solid fa-chevron-down professional-select-arrow"></i>
+
+            </div>
+
+
+            <div class="filter-control-footer">
+
+              <span>
+                <i class="fa-solid fa-calendar-days"></i>
+                Pregled kola
+              </span>
+
+              <strong>
+                {{ selectedRound }}.
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- NO ROUND / KNOCKOUT -->
+          <!-- ============================================= -->
+
+          <div
+            class="filter-control filter-control-info"
+            *ngIf="
+              !loadingResults &&
+              results &&
+              results.phases.length > 0 &&
+              selectedPhase &&
+              !phaseHasRounds(selectedPhase)
+            "
+          >
+
+            <div class="filter-control-header">
+
+              <div class="filter-step completed">
+                <i class="fa-solid fa-check"></i>
+              </div>
+
+              <div class="filter-control-heading">
+
+                <span class="filter-control-kicker">
+                  STRUKTURA
+                </span>
+
+                <strong>
+                  Faza bez kola
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="phase-info-box">
+
+              <div class="phase-info-icon">
+                <i class="fa-solid fa-diagram-project"></i>
+              </div>
+
+              <div>
+
+                <strong>
+                  {{ selectedPhase.name }}
+                </strong>
+
+                <span>
+                  Ova faza ne koristi sistem kola.
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- FILTER SUMMARY -->
+
+        <div
+          class="filter-summary"
+          *ngIf="
+            !loadingResults &&
+            results &&
+            selectedPhase
+          "
+        >
+
+          <div class="filter-summary-left">
+
+            <div class="summary-icon">
+              <i class="fa-solid fa-filter"></i>
+            </div>
+
+            <div>
+
+              <span class="summary-label">
+                TRENUTNI PRIKAZ
+              </span>
+
+              <strong>
+                {{ results.competitionName }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="summary-path">
+
+            <span>
+              {{ selectedPhase.name }}
+            </span>
+
+            <i
+              class="fa-solid fa-chevron-right"
+              *ngIf="
+                selectedRound !== null &&
+                phaseHasRounds(selectedPhase)
+              "
+            ></i>
+
+            <span
+              *ngIf="
+                selectedRound !== null &&
+                phaseHasRounds(selectedPhase)
+              "
+            >
+              {{ selectedRound }}. kolo
+            </span>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- ERROR -->
+      <!-- ================================================= -->
+
+      <div
+        class="message-card error-card"
+        *ngIf="errorMessage"
+      >
+
+        <div class="message-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+
+        <div>
+          <strong>Došlo je do greške</strong>
+          <p>{{ errorMessage }}</p>
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- LOADING -->
+      <!-- ================================================= -->
+
+      <div
+        class="loading-state"
+        *ngIf="loadingResults"
+      >
+
+        <div class="loading-spinner"></div>
+
+        <span>
+          Učitavanje rezultata...
+        </span>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- RESULTS -->
+      <!-- ================================================= -->
+
+      <section
+        class="results-content"
+        *ngIf="
+          !loadingResults &&
+          results &&
+          selectedPhase
+        "
+      >
+
+        <!-- RESULTS HEADER -->
+
+        <div class="results-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              REZULTATI
+            </span>
+
+            <h2>
+              {{ results.competitionName }}
+            </h2>
+
+            <p>
+
+              {{ selectedPhase.name }}
+
+              <span
+                *ngIf="
+                  selectedRound !== null &&
+                  !showOnlyLive
+                "
+              >
+                · {{ selectedRound }}. kolo
+              </span>
+
+            </p>
+
+          </div>
+
+
+          <div class="results-total">
+
+            <i class="fa-solid fa-futbol"></i>
+
+            <span>
+
+              {{ visibleMatchCount }}
+
+              {{
+                visibleMatchCount === 1
+                  ? 'utakmica'
+                  : 'utakmica'
+              }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- LIVE FILTER SWITCH -->
+
+        <div class="live-filter-panel">
+
+          <div class="live-filter-description">
+
+            <div class="live-filter-icon">
+              <i class="fa-solid fa-tower-broadcast"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                Praćenje utakmica
+              </strong>
+
+              <span>
+
+                {{
+                  showOnlyLive
+                    ? 'Prikazuju se samo utakmice uživo'
+                    : 'Prikazuju se sve dostupne utakmice'
+                }}
+
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="live-filter-control">
+
+            <span
+              class="live-filter-label"
+              [class.active]="!showOnlyLive"
+            >
+              Sve
+            </span>
+
+
+            <button
+              type="button"
+              class="live-switch"
+              role="switch"
+              [attr.aria-checked]="showOnlyLive"
+              [class.active]="showOnlyLive"
+              (click)="toggleLiveFilter()"
+              aria-label="Prikaži samo utakmice uživo"
+            >
+
+              <span class="live-switch-thumb"></span>
+
+            </button>
+
+
+            <span
+              class="live-filter-label live-label"
+              [class.active]="showOnlyLive"
+            >
+
+              <span class="live-dot"></span>
+
+              Uživo
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- NO RESULTS -->
+
+        <div
+          class="empty-results"
+          *ngIf="visibleGroups.length === 0"
+        >
+
+          <div class="empty-icon">
+
+            <i
+              class="fa-solid"
+              [ngClass]="
+                showOnlyLive
+                  ? 'fa-tower-broadcast'
+                  : 'fa-futbol'
+              "
+            ></i>
+
+          </div>
+
+
+          <h3>
+
+            {{
+              showOnlyLive
+                ? 'Trenutno nema utakmica uživo'
+                : 'Nema rezultata za izabrano kolo'
+            }}
+
+          </h3>
+
+
+          <p>
+
+            {{
+              showOnlyLive
+                ? 'Kada neka utakmica počne, ovde će se prikazivati njen rezultat uživo.'
+                : 'Za ovu fazu i izabrano kolo trenutno nema završenih ili aktivnih utakmica.'
+            }}
+
+          </p>
+
+
+          <button
+            *ngIf="showOnlyLive"
+            type="button"
+            class="show-all-button"
+            (click)="toggleLiveFilter()"
+          >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Prikaži sve utakmice
+
+          </button>
+
+        </div>
+
+
+        <!-- GROUPS -->
+
+        <div
+          class="group-list"
+          *ngIf="visibleGroups.length > 0"
+        >
+
+          <div
+            class="group-section"
+            *ngFor="
+              let group of visibleGroups;
+              trackBy: trackByGroup
+            "
+          >
+
+            <!-- GROUP HEADER -->
+
+            <div class="group-header">
+
+              <div class="group-name">
+
+                <span class="group-dot"></span>
+
+                <strong>
+                  {{ group.name }}
+                </strong>
+
+              </div>
+
+              <span>
+
+                {{ group.matches.length }}
+
+                {{
+                  group.matches.length === 1
+                    ? 'utakmica'
+                    : 'utakmica'
+                }}
+
+              </span>
+
+            </div>
+
+
+            <!-- MATCHES -->
+
+            <div class="matches-list">
+
+              <article
+                class="result-match-card"
+                *ngFor="
+                  let match of group.matches;
+                  trackBy: trackByMatch
+                "
+                [class.match-live]="isLiveMatch(match)"
+              >
+
+                <!-- LIVE INDICATOR -->
+
+                <div
+                  class="match-live-indicator"
+                  *ngIf="isLiveMatch(match)"
+                >
+
+                  <span class="live-dot"></span>
+
+                  UTAKMICA UŽIVO
+
+                </div>
+
+
+                <!-- DATE -->
+
+                <div class="match-date">
+
+                  <strong>
+                    {{ formatDate(match.matchDate) }}
+                  </strong>
+
+                  <span>
+                    {{ formatDay(match.matchDate) }}
+                  </span>
+
+                  <small *ngIf="!isLiveMatch(match)">
+                    {{ formatTime(match.matchDate) }}
+                  </small>
+
+                  <small
+                    class="live-time"
+                    *ngIf="isLiveMatch(match)"
+                  >
+
+                    <i class="fa-solid fa-circle"></i>
+
+                    U TOKU
+
+                  </small>
+
+                </div>
+
+
+                <!-- TEAMS -->
+
+                <div class="match-teams">
+
+                  <!-- HOME -->
+
+                  <div class="result-team home-team">
+
+                    <div class="team-info">
+
+                      <strong>
+                        {{ match.homeTeam.name }}
+                      </strong>
+
+                      <span
+                        *ngIf="match.homeTeam.shortName"
+                      >
+                        {{ match.homeTeam.shortName }}
+                      </span>
+
+                    </div>
+
+
+                    <div class="team-logo">
+
+                      <img
+                        *ngIf="match.homeTeam.logoUrl"
+                        [src]="getTeamLogoUrl(match.homeTeam.logoUrl)"
+                        [alt]="match.homeTeam.name"
+                      />
+
+                      <span
+                        *ngIf="!match.homeTeam.logoUrl"
+                      >
+                        {{ getTeamInitial(match.homeTeam.name) }}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  <!-- SCORE -->
+
+                  <div class="match-score">
+
+                    <div
+                      class="score"
+                      [ngClass]="getHomeScoreClass(match)"
+                    >
+                      {{ match.homeScore }}
+                    </div>
+
+                    <span class="score-divider">
+                      :
+                    </span>
+
+                    <div
+                      class="score"
+                      [ngClass]="getAwayScoreClass(match)"
+                    >
+                      {{ match.awayScore }}
+                    </div>
+
+                  </div>
+
+
+                  <!-- AWAY -->
+
+                  <div class="result-team away-team">
+
+                    <div class="team-logo">
+
+                      <img
+                        *ngIf="match.awayTeam.logoUrl"
+                        [src]="getTeamLogoUrl(match.awayTeam.logoUrl)"
+                        [alt]="match.awayTeam.name"
+                      />
+
+                      <span
+                        *ngIf="!match.awayTeam.logoUrl"
+                      >
+                        {{ getTeamInitial(match.awayTeam.name) }}
+                      </span>
+
+                    </div>
+
+
+                    <div class="team-info">
+
+                      <strong>
+                        {{ match.awayTeam.name }}
+                      </strong>
+
+                      <span
+                        *ngIf="match.awayTeam.shortName"
+                      >
+                        {{ match.awayTeam.shortName }}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <!-- META -->
+
+                <div class="match-meta">
+
+                  <span *ngIf="match.round">
+
+                    <i class="fa-solid fa-hashtag"></i>
+
+                    Kolo {{ match.round }}
+
+                  </span>
+
+
+                  <span *ngIf="match.location">
+
+                    <i class="fa-solid fa-location-dot"></i>
+
+                    {{ match.location }}
+
+                  </span>
+
+
+                  <span
+                    class="live-badge"
+                    *ngIf="isLiveMatch(match)"
+                  >
+
+                    <span class="live-dot"></span>
+
+                    UŽIVO
+
+                  </span>
+
+
+                  <span
+                    class="finished-badge"
+                    *ngIf="!isLiveMatch(match)"
+                  >
+
+                    <i class="fa-solid fa-check"></i>
+
+                    Završeno
+
+                  </span>
+
+
+                  <a
+                    class="match-details-button"
+                    [routerLink]="['/utakmica', match.id]"
+                  >
+
+                    Detalji utakmice
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                  </a>
+
+                </div>
+
+              </article>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+</div>
