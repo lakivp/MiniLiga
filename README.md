@@ -99,7 +99,7 @@ The frontend is built with Angular and is intended to provide a user-friendly ex
 
 ### Database
 
-The application uses a database configured through the backend connection string. The specific database provider should match the backend configuration and installed Entity Framework Core provider.
+The application uses a MySQL database, configured through the backend connection string. Entity Framework Core is used as the ORM to manage database operations and interact with the MySQL database.
 
 ### Development Tools
 
