@@ -1,4 +1,4 @@
-# MiniLiga ⚽
+# MiniLiga
 
 **A Full-Stack Football League Management Platform**
 
@@ -26,39 +26,39 @@ The platform is designed for amateur football leagues, mini-football competition
 
 ## Key Features
 
-### 🏆 League Standings
+### League Standings
 
 - Display the league table.
 - Present team positions and competition statistics.
 - Keep league information organized in a centralized interface.
 
-### 📅 Match Fixtures and Scheduling
+### Match Fixtures and Scheduling
 
 - Organize fixtures by round.
 - Display scheduled matches and match details.
 - Support match scheduling and administration.
 
-### ⚡ Live Match Tracking
+### Live Match Tracking
 
 - Follow match scores and recorded events.
 - Manage match progress through administrative functionality.
 - Record events such as goals and cards.
 - Support real-time communication through SignalR where configured.
 
-### 👥 Team Management
+### Team Management
 
 - Maintain team information.
 - View registered teams.
 - Search teams by name.
 - Support administrative team management.
 
-### 🧑‍🤝‍🧑 Player Management
+### Player Management
 
 - Maintain player information and team associations.
 - Organize player records.
 - Support player statistics associated with matches.
 
-### 📊 Player Statistics
+### Player Statistics
 
 The application is designed to organize individual performance data, including:
 
@@ -67,13 +67,13 @@ The application is designed to organize individual performance data, including:
 - Cards.
 - Other match-related statistics supported by the implementation.
 
-### 🛠️ Administration
+### Administration
 
 Administrative functionality is intended to provide centralized control over league data and match operations.
 
 Depending on the configured permissions and implemented modules, administrative tasks include team and player management, fixture administration, and match event recording.
 
-### 📱 Responsive Interface
+### Responsive Interface
 
 The frontend is built with Angular and is intended to provide a user-friendly experience across desktop and mobile screen sizes.
 
