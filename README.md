@@ -7,28 +7,6 @@ MiniLiga is a web application designed to simplify the organization and manageme
 The application combines an **Angular frontend** with an **ASP.NET Core Web API backend**, providing a modern and responsive user experience backed by a structured server-side architecture.
 
 ---
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [Technology Stack](#technology-stack)
-- [Project Structure](#project-structure)
-- [Application Modules](#application-modules)
-- [Architecture](#architecture)
-- [Getting Started](#getting-started)
-- [Configuration](#configuration)
-- [Database and Migrations](#database-and-migrations)
-- [Authentication and Security](#authentication-and-security)
-- [Running the Application](#running-the-application)
-- [Build and Validation](#build-and-validation)
-- [Deployment Considerations](#deployment-considerations)
-- [Future Improvements](#future-improvements)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
 ## Overview
 
 Organizing a football league involves more than scheduling matches. Administrators need to manage teams and players, maintain fixtures, record match events, calculate standings, and keep statistics up to date.
