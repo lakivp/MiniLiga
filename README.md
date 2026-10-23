@@ -9,7 +9,7 @@ The application combines an **Angular frontend** with an **ASP.NET Core Web API 
 ---
 ## Overview
 
-Organizing a football league involves more than scheduling matches. Administrators need to manage teams and players, maintain fixtures, record match events, calculate standings, and keep statistics up to date.
+Organizing a football league involves more than scheduling matches. Administrators need to manage teams and players, maintain fixtures, record match events.
 
 MiniLiga aims to bring these tasks together in one application.
 
